@@ -1,0 +1,64 @@
+{
+  "name": "minitrix2",
+  "author": "lavendork",
+  "version": "0.1.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
+  "pebble": {
+    "displayName": "Minitrix2",
+    "uuid": "8b227bd2-e5dc-40d1-93b8-aeecdccfa51b",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "capabilities": [
+      "configurable",
+      "location"
+    ],
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "messageKeys": [
+      "DialMode",
+      "HideUI",
+      "HighContrast",
+      "DoColorOverride",
+      "OverrideColor",
+
+      "DoWeather",
+      "OWMToken",
+      "NowTemperature"
+    ],
+    "resources": {
+      "media": [
+        {
+          "menuIcon": true,
+          "type": "bitmap",
+          "name": "IMAGE_MENU_ICON",
+          "file": "mintrix_icon_bitmap.png"
+        },
+        {
+          "type": "font",
+          "name": "BALOO_60",
+          "file": "Baloo2-Bold.ttf",
+          "characterRegex": "[0-9]"
+        },
+        {
+          "type": "font",
+          "name": "ALATSI_56",
+          "file": "Alatsi-Regular.ttf",
+          "characterRegex": "[0-9]"
+        }
+      ]
+    }
+  }
+}
