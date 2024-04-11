@@ -75,6 +75,29 @@ module.exports = [
     },
 
     {
+        "type": "section",
+        "items": [
+            {
+                "type": "heading",
+                "defaultValue": "Features"
+            },
+            {
+                "type": "toggle",
+                "label": "Show weather",
+                "description": "You will need to provide an OpenWeatherMap API token for this to work",
+                "defaultValue": false,
+                "messageKey": "DoWeather"
+            },
+            {
+                "type": "input",
+                "label": "OpenWeatherMap API Token",
+                "attributes": { "placeholder": "Paste here..." },
+                "messageKey": "OWMToken"
+            }
+        ]
+    },
+
+    {
         "type": "submit",
         "defaultValue": "Save"
     }
