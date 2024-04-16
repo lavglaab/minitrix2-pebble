@@ -9,7 +9,7 @@
 #define PAL_CLASSIC_CLOCK_OUTLINE GColorBlack
 
 #if defined(PBL_COLOR)
-#define PAL_CLASSIC_STATUS_DISCONNECT GColorYellow
+#define PAL_CLASSIC_STATUS_DISCONNECT GColorChromeYellow
 #define PAL_CLASSIC_STATUS_LOWBATT GColorRed
 #define PAL_CLASSIC_TEXT_DISCONNECT GColorArmyGreen
 #define PAL_CLASSIC_TEXT_LOWBATT GColorBulgarianRose
