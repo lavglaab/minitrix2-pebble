@@ -2,6 +2,7 @@
 #include "omni.h"
 #include "settings.h"
 #include "omni_paths.c"
+#include "debug_flags.h"
 
 static Layer *s_layer_background;
 static TextLayer *s_layer_date;
@@ -129,7 +130,7 @@ static void prv_omni_ui_set_hidden(bool value) {
 }
 
 static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "update_proc_omni_bg");
+    LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "update_proc_omni_bg");
     GRect bounds = layer_get_bounds(layer);
 
     if (!s_path_green_stripes) { s_path_green_stripes = gpath_create(&PATH_GREEN_STRIPE); }
@@ -167,8 +168,8 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
                                         "%H" : "%I", tick_time);
     strftime(omni_time_minute, sizeof(omni_time_minute), "%M", tick_time);
 
-    // APP_LOG(APP_LOG_LEVEL_DEBUG, "time_hour: %s", omni_time_hour);
-    // APP_LOG(APP_LOG_LEVEL_DEBUG, "time_minute: %s", omni_time_minute);
+    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "time_hour: %s", omni_time_hour);
+    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "time_minute: %s", omni_time_minute);
 
     static char oh1[2];
     static char oh2[2];

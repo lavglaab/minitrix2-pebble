@@ -2,6 +2,7 @@
 #include "settings.h"
 #include "classic.c"
 #include "omni.c"
+#include "debug_flags.h"
 
 static Window *s_window_classic;
 static Window *s_window_omni;
@@ -119,7 +120,7 @@ static void prv_deinit(void) {
 int main(void) {
   prv_init();
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window");
+  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window");
 
   app_event_loop();
   prv_deinit();

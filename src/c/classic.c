@@ -2,6 +2,7 @@
 #include "classic.h"
 #include "settings.h"
 #include "classic_paths.c"
+#include "debug_flags.h"
 
 static Layer *s_layer_background;
 static TextLayer *s_layer_date;
@@ -137,7 +138,7 @@ static void prv_classic_ui_set_hidden(bool value) {
 }
 
 static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "update_proc_classic_bg");
+    LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "update_proc_classic_bg");
     GRect bounds = layer_get_bounds(layer);
 
     if (!s_path_carets_black) { s_path_carets_black = gpath_create(&PATH_BLACK_CARET); }
@@ -173,8 +174,8 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
                                         "%H" : "%I", tick_time);
     strftime(classic_time_minute, sizeof(classic_time_minute), "%M", tick_time);
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "time_hour: %s", classic_time_hour);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "time_minute: %s", classic_time_minute);
+    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "time_hour: %s", classic_time_hour);
+    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "time_minute: %s", classic_time_minute);
 
     #if defined(PBL_RECT)
     static char ch1[2];
@@ -193,10 +194,10 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     graphics_draw_text(ctx, cm2, classic_font_time, BOUND_CLASSIC_TIME_M2, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute2
     
     
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "h1: %s", ch1);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "h2: %s", ch2);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "m1: %s", cm1);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "m2: %s", cm2);
+    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "h1: %s", ch1);
+    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "h2: %s", ch2);
+    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "m1: %s", cm1);
+    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "m2: %s", cm2);
     #endif
 
     #if defined(PBL_ROUND)
