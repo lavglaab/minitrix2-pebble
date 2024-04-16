@@ -34,25 +34,25 @@ static void push_proper_dial_window();
 
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
   // UI
-  Tuple *dial_mode_t = dict_find(iter, MESSAGE_KEY_DialMode);
+  Tuple *dial_mode_t = dict_find(iter, MESSAGE_KEY_PrefDialMode);
   if(dial_mode_t) {
     settings.DialMode = dial_mode_t->value->int8;
   }
 
-  Tuple *hide_ui_t = dict_find(iter, MESSAGE_KEY_HideUI);
+  Tuple *hide_ui_t = dict_find(iter, MESSAGE_KEY_PrefHideUI);
   if(hide_ui_t) { settings.HideUI = hide_ui_t->value->int32 == 1; }
 
-  Tuple *high_contrast_t = dict_find(iter, MESSAGE_KEY_HighContrast);
+  Tuple *high_contrast_t = dict_find(iter, MESSAGE_KEY_PrefHighContrast);
   if(high_contrast_t) { settings.HighContrast = high_contrast_t->value->int32 == 1; }
 
-  Tuple *do_color_override_t = dict_find(iter, MESSAGE_KEY_DoColorOverride);
+  Tuple *do_color_override_t = dict_find(iter, MESSAGE_KEY_PrefDoColorOverride);
   if(do_color_override_t) { settings.DoColorOverride = do_color_override_t->value->int32 == 1; }
 
-  Tuple *custom_color_t = dict_find(iter, MESSAGE_KEY_OverrideColor);
+  Tuple *custom_color_t = dict_find(iter, MESSAGE_KEY_PrefOverrideColor);
   if(custom_color_t) { settings.CustomColor = GColorFromHEX(custom_color_t->value->int32); }
 
   //Features
-  Tuple *do_weather_t = dict_find(iter, MESSAGE_KEY_DoWeather);
+  Tuple *do_weather_t = dict_find(iter, MESSAGE_KEY_PrefDoWeather);
   if(do_weather_t) { settings.DoWeather = do_weather_t->value->int32 == 1; }
 
   prv_save_settings();

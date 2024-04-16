@@ -28,15 +28,17 @@
       "watchface": true
     },
     "messageKeys": [
-      "DialMode",
-      "HideUI",
-      "HighContrast",
-      "DoColorOverride",
-      "OverrideColor",
+      "PrefDialMode",
+      "PrefHideUI",
+      "PrefHighContrast",
+      "PrefDoColorOverride",
+      "PrefOverrideColor",
 
-      "DoWeather",
-      "OWMToken",
-      "NowTemperature"
+      "PrefDoWeather",
+      "WeatherToken",
+      "WeatherRequestPls",
+      "WeatherTemperature",
+      "WeatherCondition"
     ],
     "resources": {
       "media": [
