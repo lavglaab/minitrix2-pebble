@@ -35,8 +35,10 @@
       "PrefOverrideColor",
 
       "PrefDoWeather",
+      "PrefWeatherUnits",
       "WeatherToken",
       "WeatherRequestPls",
+      "WeatherReturn",
       "WeatherTemperature",
       "WeatherCondition"
     ],

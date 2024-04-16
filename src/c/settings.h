@@ -12,4 +12,5 @@ typedef struct ClaySettings{
     bool HighContrast;
     
     bool DoWeather;
+    char WeatherUnits;
 } __attribute__((__packed__)) ClaySettings;

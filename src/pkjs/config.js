@@ -93,6 +93,22 @@ module.exports = [
                 "label": "OpenWeatherMap API Token",
                 "attributes": { "placeholder": "Paste here..." },
                 "messageKey": "WeatherToken"
+            },
+            {
+                "type": "radiogroup",
+                "defaultValue": "f",
+                "label": "Weather units",
+                "messageKey": "PrefWeatherUnits",
+                "options": [
+                    {
+                        "label": "Farenheit",
+                        "value": "f"
+                    },
+                    {
+                        "label": "Celsius",
+                        "value": "c"
+                    }
+                ]
             }
         ]
     },
