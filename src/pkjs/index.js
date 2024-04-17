@@ -27,12 +27,14 @@ Pebble.addEventListener('webviewclosed',
         // Grab OWM API token and save it to JS storage
         dict = clay.getSettings(e.response, false);
         if (dict.WeatherToken) {
-                localStorage.setItem("WeatherToken", dict.WeatherToken);
+                console.log("Weathertoken: " + dict.WeatherToken.value);
+                localStorage.setItem("WeatherToken", dict.WeatherToken.value);
         }
 
         // Grab weather units pref and save it to JS storage
         if (dict.PrefWeatherUnits) {
-                localStorage.setItem("PrefWeatherUnits", dict.PrefWeatherUnits);
+                console.log("PrefWeatherUnits: " + dict.PrefWeatherUnits.value);
+                localStorage.setItem("PrefWeatherUnits", dict.PrefWeatherUnits.value);
         }
     }
 );
@@ -52,6 +54,11 @@ Pebble.addEventListener('ready',
     } else {
         console.log('No weather units pref stored');
     }
+
+    // Just for debugging, we're going to launch a weather request
+    // right now. Remember to remove this when the watch side
+    // gets its smarts about when and how to request data
+    getWeather();
   }
 );
 
@@ -74,23 +81,25 @@ function locationSuccess(pos) {
                 + '&appid=' + localStorage.getItem("WeatherToken");
 
         // Send request to OpenWeatherMap
-        xhrRequest(url, 'GET', 
-        function(responseText) {
+        var xhrRequest = new XMLHttpRequest();
+        xhrRequest.onload =  function() {
                 // responseText contains a JSON object with weather info
-                var json = JSON.parse(responseText);
+                var json = JSON.parse(this.responseText);
+
+                // console.log("API response: " + JSON.stringify(this.responseText));
 
                 // Temperature in Kelvin requires adjustment
                 var tempUnits;
-                var temperature;
+                var temperature = json.main.temp;
                 switch (localStorage.getItem("PrefWeatherUnits")) {
                         case 'c' :
                                 // Celsius
-                                temperature = Math.round(json.main.temp - 273.15);
+                                temperature = Math.round(temperature - 273.15);
                                 console.log('using celsius units');
                                 break;
                         default:
                                 // Farenheit
-                                temperature = Math.round(json.main.temp - 459.67);
+                                temperature = Math.round(temperature - 459.67);
                                 console.log('using farenheit units');
                                 break;
                         
@@ -101,13 +110,15 @@ function locationSuccess(pos) {
                 // Conditions
                 var conditions = json.weather[0].main;      
                 console.log('Conditions are ' + conditions);
-        });
+        };
+        xhrRequest.open('GET', url);
+        xhrRequest.send();
 }
       
 function locationError(err) {
-        console.log('Error requesting location!');
+        console.log('Error requesting location: ' + err.message);
         // Send error to watch
-        sendWeatherError(1);
+        sendWeatherError(1); // where 1=Error
 }
 
 function getWeather() {
@@ -120,7 +131,7 @@ function getWeather() {
                       );   
         } else {
                 // User hasn't set a token, throw an error to the watch
-                sendWeatherError(2);
+                sendWeatherError(2); // where 2=NoToken
         }
 }
 

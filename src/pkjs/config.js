@@ -91,6 +91,7 @@ module.exports = [
             {
                 "type": "input",
                 "label": "OpenWeatherMap API Token",
+                "defaultValue": "",
                 "attributes": { "placeholder": "Paste here..." },
                 "messageKey": "WeatherToken"
             },
