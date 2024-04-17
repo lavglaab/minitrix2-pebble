@@ -102,7 +102,7 @@ module.exports = [
                 "messageKey": "PrefWeatherUnits",
                 "options": [
                     {
-                        "label": "Farenheit",
+                        "label": "Fahrenheit",
                         "value": "f"
                     },
                     {

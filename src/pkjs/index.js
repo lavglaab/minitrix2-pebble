@@ -98,9 +98,9 @@ function locationSuccess(pos) {
                                 console.log('using celsius units');
                                 break;
                         default:
-                                // Farenheit
-                                temperature = Math.round(temperature - 459.67);
-                                console.log('using farenheit units');
+                                // Fahrenheit
+                                temperature = Math.round((temperature - 273.15) * 9/5 + 32);
+                                console.log('using fahrenheit units');
                                 break;
                         
                 }
