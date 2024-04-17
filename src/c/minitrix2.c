@@ -29,11 +29,25 @@ static void prv_save_settings() {
   persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
 }
 
+/* ---------- Weather ---------- */
+
+static void request_new_weather() {
+  // Create and send appmessage with the messagekey MESSAGE_KEY_WeatherRequestPls
+}
+
+static void check_weather() {
+  // Check persistent storage for weather values
+  // If exists, check if nowtime > timestamp
+  // If not, return weather data
+  // If so, request_new_weather
+}
+
 /* ---------- Message handling ---------- */
 
 static void push_proper_dial_window();
 
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+  /* ---- Settings ---- */
   // UI
   Tuple *dial_mode_t = dict_find(iter, MESSAGE_KEY_PrefDialMode);
   if(dial_mode_t) {
@@ -60,6 +74,31 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
 
   if(dial_mode_t || hide_ui_t || do_color_override_t || custom_color_t || do_weather_t) {
     push_proper_dial_window();
+  }
+
+  /* ---- Weather data ---- */
+  Tuple *weather_return_t = dict_find(iter, MESSAGE_KEY_WeatherReturn);
+  if(weather_return_t) {
+    // We either got new weather, or an error
+    int weather_returncode = weather_return_t->value->int32;
+
+    switch (weather_returncode) {
+      case 0:
+        // OK, we should also have data
+        Tuple *weather_temp_t = dict_find(iter, MESSAGE_KEY_WeatherTemperature);
+        if (weather_temp_t) { }
+        Tuple *weather_conditions_t = dict_find(iter, MESSAGE_KEY_WeatherCondition);
+        if (weather_conditions_t) { }
+        break;
+      case 1:
+        // Some kind of error fetching data
+
+        break;
+      case 2:
+        // User hasn't provided a token
+
+        break;
+    }
   }
 }
 

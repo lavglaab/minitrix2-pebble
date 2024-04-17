@@ -110,6 +110,19 @@ function locationSuccess(pos) {
                 // Conditions
                 var conditions = json.weather[0].main;      
                 console.log('Conditions are ' + conditions);
+
+                var dict = {
+                        'WeatherReturn': 0, // where 0=OK
+                        'WeatherTemperature': temperature,
+                        'WeatherCondition': conditions
+                };
+        
+                // Send the object
+                Pebble.sendAppMessage(dict, function() {
+                console.log('Message sent successfully: ' + JSON.stringify(dict));
+                }, function(e) {
+                console.log('Message failed: ' + JSON.stringify(e));
+                });
         };
         xhrRequest.open('GET', url);
         xhrRequest.send();
