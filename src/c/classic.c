@@ -30,6 +30,7 @@ static void classic_default_settings() {
   classic_settings.CustomColor = GColorWhite;
   classic_settings.HighContrast = false;
   classic_settings.DoWeather = false;
+  classic_settings.WeatherUnits = 'f';
 }
 
 static void classic_load_settings() {

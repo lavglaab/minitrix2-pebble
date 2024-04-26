@@ -28,6 +28,8 @@
       "watchface": true
     },
     "messageKeys": [
+      "JSReady",
+      
       "PrefDialMode",
       "PrefHideUI",
       "PrefHighContrast",
@@ -38,8 +40,8 @@
       "PrefWeatherUnits",
       "WeatherToken",
       "WeatherRequestPls",
-      "WeatherReturn",
-      "WeatherTemperature",
+      "WeatherReturnCode",
+      "WeatherTemperatureK",
       "WeatherCondition"
     ],
     "resources": {

@@ -58,7 +58,10 @@ Pebble.addEventListener('ready',
     // Just for debugging, we're going to launch a weather request
     // right now. Remember to remove this when the watch side
     // gets its smarts about when and how to request data
-    getWeather();
+    //getWeather();
+
+    // Let watch know we're ready
+    Pebble.sendAppMessage({'JSReady': 1});
   }
 );
 
@@ -88,23 +91,21 @@ function locationSuccess(pos) {
 
                 // console.log("API response: " + JSON.stringify(this.responseText));
 
-                // Temperature in Kelvin requires adjustment
-                var tempUnits;
+                // Temperature in Kelvin requires adjustment (we will do this on the watch i think)
                 var temperature = json.main.temp;
-                switch (localStorage.getItem("PrefWeatherUnits")) {
-                        case 'c' :
-                                // Celsius
-                                temperature = Math.round(temperature - 273.15);
-                                console.log('using celsius units');
-                                break;
-                        default:
-                                // Fahrenheit
-                                temperature = Math.round((temperature - 273.15) * 9/5 + 32);
-                                console.log('using fahrenheit units');
-                                break;
+                // switch (localStorage.getItem("PrefWeatherUnits")) {
+                //         case 'c' :
+                //                 // Celsius
+                //                 temperature = Math.round(temperature - 273.15);
+                //                 console.log('using celsius units');
+                //                 break;
+                //         default:
+                //                 // Fahrenheit
+                //                 temperature = Math.round((temperature - 273.15) * 9/5 + 32);
+                //                 console.log('using fahrenheit units');
+                //                 break;
                         
-                }
-                
+                // }
                 console.log('Temperature is ' + temperature);
 
                 // Conditions
@@ -112,8 +113,8 @@ function locationSuccess(pos) {
                 console.log('Conditions are ' + conditions);
 
                 var dict = {
-                        'WeatherReturn': 0, // where 0=OK
-                        'WeatherTemperature': temperature,
+                        'WeatherReturnCode': 0, // where 0=OK
+                        'WeatherTemperatureK': temperature,
                         'WeatherCondition': conditions
                 };
         
@@ -135,22 +136,22 @@ function locationError(err) {
 }
 
 function getWeather() {
-        if (localStorage.getItem("WeatherToken")) {
-                // We have a token saved, go ahead!
-                navigator.geolocation.getCurrentPosition(
-                        locationSuccess,
-                        locationError,
-                        {timeout: 15000, maximumAge: 60000}
-                      );   
-        } else {
+        
+        if (!localStorage.getItem("WeatherToken")) {
                 // User hasn't set a token, throw an error to the watch
                 sendWeatherError(2); // where 2=NoToken
+                return;
         }
+        // We have a token saved, go ahead!
+        navigator.geolocation.getCurrentPosition(
+                locationSuccess,
+                locationError,
+                {timeout: 15000, maximumAge: 60000});   
 }
 
 function sendWeatherError(exitCode) {
         var dict = {
-                'WeatherReturn': exitCode, // where 0=OK, 1=Error, and 2=NoToken
+                'WeatherReturnCode': exitCode, // where 0=OK, 1=Error, and 2=NoToken
         };
 
         // Send the object

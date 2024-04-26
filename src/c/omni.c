@@ -32,6 +32,7 @@ static void omni_default_settings() {
   omni_settings.CustomColor = GColorWhite;
   omni_settings.HighContrast = false;
   omni_settings.DoWeather = false;
+  omni_settings.WeatherUnits = 'f';
 }
 
 static void omni_load_settings() {
