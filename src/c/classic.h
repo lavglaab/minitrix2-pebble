@@ -1,7 +1,7 @@
 #include <pebble.h>
 
 /* ---------- Palette colors ----------*/
-#define PAL_CLASSIC_JEWEL PBL_IF_COLOR_ELSE(GColorSpringBud, GColorWhite)
+#define PAL_CLASSIC_JEWEL PBL_IF_COLOR_ELSE(GColorBrightGreen, GColorWhite)
 #define PAL_CLASSIC_COMPLICATIONS PBL_IF_COLOR_ELSE(GColorDarkGreen, GColorBlack)
 #define PAL_CLASSIC_GREY_CARETS GColorDarkGray
 #define PAL_CLASSIC_BLACK_CARETS GColorBlack
