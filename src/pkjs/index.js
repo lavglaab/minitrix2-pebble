@@ -89,23 +89,8 @@ function locationSuccess(pos) {
                 // responseText contains a JSON object with weather info
                 var json = JSON.parse(this.responseText);
 
-                // console.log("API response: " + JSON.stringify(this.responseText));
-
-                // Temperature in Kelvin requires adjustment (we will do this on the watch i think)
+                // Send raw Kelvin temperature, the watch manages unit conversion
                 var temperature = json.main.temp;
-                // switch (localStorage.getItem("PrefWeatherUnits")) {
-                //         case 'c' :
-                //                 // Celsius
-                //                 temperature = Math.round(temperature - 273.15);
-                //                 console.log('using celsius units');
-                //                 break;
-                //         default:
-                //                 // Fahrenheit
-                //                 temperature = Math.round((temperature - 273.15) * 9/5 + 32);
-                //                 console.log('using fahrenheit units');
-                //                 break;
-                        
-                // }
                 console.log('Temperature is ' + temperature);
 
                 // Conditions
