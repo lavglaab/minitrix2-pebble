@@ -63,6 +63,57 @@
           "name": "ALATSI_56",
           "file": "Alatsi-Regular.ttf",
           "characterRegex": "[0-9]"
+        },
+
+        {
+          "type": "raw",
+          "name": "W_CLEAR_DAY",
+          "file": "weather-icons/clear-day-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_CLEAR_NIGHT",
+          "file": "weather-icons/clear-night-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_CLOUDY",
+          "file": "weather-icons/cloudy-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_FOG",
+          "file": "weather-icons/fog-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_PARTLY_CLOUDY_DAY",
+          "file": "weather-icons/partly-cloudy-day-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_PARTLY_CLOUDY_NIGHT",
+          "file": "weather-icons/partly-cloudy-night-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_RAIN",
+          "file": "weather-icons/rain-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_SLEET",
+          "file": "weather-icons/sleet-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_SNOW",
+          "file": "weather-icons/snow-s.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "W_WIND",
+          "file": "weather-icons/wind-s.pdc"
         }
       ]
     }
