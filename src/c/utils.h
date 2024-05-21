@@ -16,7 +16,7 @@ typedef struct ClaySettings{
     char WeatherUnits;
 } __attribute__((__packed__)) ClaySettings;
 
-static ClaySettings s_settings;
+ClaySettings s_settings;
 
 void default_settings();
 
@@ -29,8 +29,8 @@ void save_settings();
 
 typedef struct WeatherData{
     int TemperatureKelvin;
-    int Condition; // see https://openweathermap.org/weather-conditions
-    int Timestamp; // should be one hour after data was received
+    int Condition; // raw, see https://openweathermap.org/weather-conditions
+    int Timestamp; // Time of expiry, stamped upon receipt of data
 } __attribute__((__packed__)) WeatherData;
 
 static WeatherData s_weather;

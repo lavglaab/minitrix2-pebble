@@ -1,5 +1,16 @@
 #include <pebble.h>
 
+/* ---------- UI ---------- */
+void omni_update_minute();
+void omni_update_date();
+void omni_update_weather(int response_code);
+void omni_update_style();
+void omni_ui_set_hidden(bool value);
+
+/* ----------Life cycle ---------- */
+void omni_window_load(Window *window);
+void omni_window_unload(Window *window);
+
 /* ---------- Palette colors ----------*/
 #define PAL_OMNI_STRIPES PBL_IF_COLOR_ELSE(GColorJaegerGreen, GColorWhite)
 #define PAL_OMNI_BG GColorBlack

@@ -1,5 +1,16 @@
 #include <pebble.h>
 
+/* ---------- UI ---------- */
+void classic_update_minute();
+void classic_update_date();
+void classic_update_weather(int response_code);
+void classic_update_style();
+void classic_ui_set_hidden(bool value);
+
+/* ----------Life cycle ---------- */
+void classic_window_load(Window *window);
+void classic_window_unload(Window *window);
+
 /* ---------- Palette colors ----------*/
 #define PAL_CLASSIC_JEWEL PBL_IF_COLOR_ELSE(GColorBrightGreen, GColorWhite)
 #define PAL_CLASSIC_COMPLICATIONS PBL_IF_COLOR_ELSE(GColorDarkGreen, GColorBlack)

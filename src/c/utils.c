@@ -2,7 +2,7 @@
 #include "utils.h"
 
 /* ---------- Settings ---------- */
-static ClaySettings s_settings;
+ClaySettings s_settings;
 
 void default_settings() {
   s_settings.DialMode = 'c';
