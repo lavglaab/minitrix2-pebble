@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include "classic.h"
-#include "settings.h"
+#include "utils.h"
 #include "classic_paths.c"
 #include "debug_flags.h"
 
@@ -19,25 +19,6 @@ static GColor classic_color_background;
 static bool classic_time_showing;
 static AppTimer *s_tap_timer;
 
-ClaySettings classic_settings;
-
-/* ----------- Settings funcs ----------*/
-
-static void classic_default_settings() {
-  classic_settings.DialMode = 'c';
-  classic_settings.HideUI = false;
-  classic_settings.DoColorOverride = false;
-  classic_settings.CustomColor = GColorWhite;
-  classic_settings.HighContrast = false;
-  classic_settings.DoWeather = false;
-  classic_settings.WeatherUnits = 'f';
-}
-
-static void classic_load_settings() {
-  classic_default_settings();
-  persist_read_data(SETTINGS_KEY, &classic_settings, sizeof(classic_settings));
-}
-
 /* ---------- Event Service Handlers ---------- */
 
 static void prv_classic_update_style(); //Defined in UI section
@@ -48,7 +29,7 @@ static void classic_tick_handler(struct tm *tick_time, TimeUnits changed) {
   if ((changed & DAY_UNIT) != 0) {
     prv_classic_update_date();
     }
-  if ((changed & HOUR_UNIT) != 0 && classic_settings.DoWeather) { /*request weather*/ }
+  if ((changed & HOUR_UNIT) != 0 && s_settings.DoWeather) { /*request weather*/ }
 }
 
 static void classic_battery_callback(BatteryChargeState state) {
@@ -65,7 +46,7 @@ static void classic_bluetooth_callback(bool connected) {
 
 static void prv_classic_ui_set_hidden(bool value); //Defined in UI section
 static void classic_tap_timer_handler(void *data) {
-  if (classic_settings.HideUI) {
+  if (s_settings.HideUI) {
     prv_classic_ui_set_hidden(true);
     s_tap_timer = NULL;
   }
@@ -96,7 +77,7 @@ static void prv_classic_update_date() {
 static GColor prv_classic_jewel_color() {
   GColor color = PAL_CLASSIC_JEWEL;
   #if defined(PBL_COLOR)
-  if (classic_settings.DoColorOverride) { color = classic_settings.CustomColor; }
+  if (s_settings.DoColorOverride) { color = s_settings.CustomColor; }
   if (battery_state_service_peek().charge_percent <= 10) { color = PAL_CLASSIC_STATUS_LOWBATT; }
   if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_STATUS_DISCONNECT; }
   #endif
@@ -107,12 +88,12 @@ static GColor prv_classic_complication_color() {
   GColor color = PAL_CLASSIC_COMPLICATIONS;
   #if defined(PBL_COLOR)
 
-  if (classic_settings.HighContrast) {
+  if (s_settings.HighContrast) {
     color = gcolor_legible_over(prv_classic_jewel_color());
     return color;
   }
 
-  if (classic_settings.DoColorOverride ) { color = gcolor_legible_over(classic_settings.CustomColor); }
+  if (s_settings.DoColorOverride ) { color = gcolor_legible_over(s_settings.CustomColor); }
   if (battery_state_service_peek().charge_percent <= 10) { color = PAL_CLASSIC_TEXT_LOWBATT; }
   if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_TEXT_DISCONNECT; }
   #endif
@@ -134,7 +115,7 @@ static void prv_classic_ui_set_hidden(bool value) {
   
   classic_time_showing = !value;
   layer_set_hidden(text_layer_get_layer(s_layer_date), value);
-  if (classic_settings.DoWeather) { layer_set_hidden(text_layer_get_layer(s_layer_weather), value); }
+  if (s_settings.DoWeather) { layer_set_hidden(text_layer_get_layer(s_layer_weather), value); }
   layer_mark_dirty(s_layer_background);
 }
 
@@ -159,7 +140,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     gpath_draw_filled(ctx, s_path_carets_black);
 
     // Draw time
-    if (!classic_settings.HideUI || classic_time_showing) {
+    if (!s_settings.HideUI || classic_time_showing) {
     if (!classic_font_time) {
       classic_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_BALOO_60));
     }
@@ -227,7 +208,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
 /* ---------- Life cycle ----------*/
 
 static void classic_window_load(Window *window) {
-  classic_load_settings();
+  load_settings();
 
   //Set up event handlers
   tick_timer_service_subscribe(MINUTE_UNIT | HOUR_UNIT | DAY_UNIT, classic_tick_handler);
@@ -235,10 +216,10 @@ static void classic_window_load(Window *window) {
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = classic_bluetooth_callback
   });
-  if (classic_settings.HideUI) { accel_tap_service_subscribe(classic_accel_tap_handler); }
+  if (s_settings.HideUI) { accel_tap_service_subscribe(classic_accel_tap_handler); }
 
   //Set background color according to classic or uaf
-  classic_color_background = (classic_settings.DialMode == 'c') 
+  classic_color_background = (s_settings.DialMode == 'c') 
     ? PAL_CLASSIC_GREY_CARETS : PAL_CLASSIC_BLACK_CARETS;
 
   Layer *window_layer = window_get_root_layer(window);
@@ -258,7 +239,7 @@ static void classic_window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(s_layer_date));
   prv_classic_update_date();
 
-  if (classic_settings.DoWeather) {
+  if (s_settings.DoWeather) {
     //Weather layer
     s_layer_weather = text_layer_create(BOUND_CLASSIC_WEATHER);
     text_layer_set_text_color(s_layer_weather, prv_classic_complication_color());
@@ -269,7 +250,7 @@ static void classic_window_load(Window *window) {
     layer_add_child(window_layer, text_layer_get_layer(s_layer_weather));
   }
 
-  prv_classic_ui_set_hidden(classic_settings.HideUI);
+  prv_classic_ui_set_hidden(s_settings.HideUI);
 }
 
 static void classic_window_unload(Window *window) {

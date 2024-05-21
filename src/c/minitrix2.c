@@ -1,96 +1,16 @@
 #include <pebble.h>
-#include "settings.h"
-#include "weather.h"
+#include "utils.h"
 #include "classic.c"
 #include "omni.c"
 
 #include "debug_flags.h"
 
-static bool s_js_ready = false;
-
 static Window *s_window_classic;
 static Window *s_window_omni;
 
-ClaySettings s_settings;
-WeatherData s_weather;
-
-/* ----------- Settings funcs ----------*/
-
-static void prv_default_settings() {
-  s_settings.DialMode = 'c';
-  s_settings.HideUI = false;
-  s_settings.DoColorOverride = false;
-  s_settings.CustomColor = GColorWhite;
-  s_settings.HighContrast = false;
-  s_settings.DoWeather = false;
-  s_settings.WeatherUnits = 'f';
-}
-
-static void prv_load_settings() {
-  prv_default_settings();
-  persist_read_data(SETTINGS_KEY, &s_settings, sizeof(s_settings));
-}
-
-static void prv_save_settings() {
-  persist_write_data(SETTINGS_KEY, &s_settings, sizeof(s_settings));
-}
-
-/* ---------- Weather ---------- */
-
-static void prv_load_weather() {
-  s_weather.Condition = 0;
-  s_weather.TemperatureKelvin = 0;
-  s_weather.Timestamp = 0;
-  persist_read_data(WEATHER_KEY, &s_weather, sizeof(s_weather));
-}
-
-static void prv_save_weather() {
-  persist_write_data(WEATHER_KEY, &s_weather, sizeof(s_weather));
-}
-
-static bool request_new_weather() {
-  if (!s_js_ready) { return false; }
-
-  // Declare the dictionary's iterator
-  DictionaryIterator *out_iter;
-
-  // Prepare the outbox buffer for this message
-  AppMessageResult result = app_message_outbox_begin(&out_iter);
-  if(result != APP_MSG_OK) {
-    // The outbox cannot be used right now
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
-    return false;
-  }
-
-  // Add an item to ask for weather data
-  int value = 1;
-  dict_write_int(out_iter, MESSAGE_KEY_WeatherRequestPls, &value, sizeof(int), true);
-
-  // Send this message
-  result = app_message_outbox_send();
-  if(result != APP_MSG_OK) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending the outbox: %d", (int)result);
-    return false;
-  }
-  return true;
-}
-
-static bool check_weather() {
-  prv_load_weather();
-  time_t now_time = time(NULL);
-  if (now_time > s_weather.Timestamp) {
-    // Stored weather is expired or nonexistent
-    return request_new_weather();
-  }
-
-  // Continue with saved weather
-  // display_update_weather(*s_weather);
-  return true;
-}
-
 /* ---------- Message handling ---------- */
 
-static void push_proper_dial_window();
+static void push_proper_dial_window(); // Defined under Lifecycle
 
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
   /* ---- Comms state ---- */
@@ -129,7 +49,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     s_settings.WeatherUnits = weather_units_t->value->int8;
   }
 
-  prv_save_settings();
+  save_settings();
 
   if(dial_mode_t || hide_ui_t || do_color_override_t || custom_color_t || do_weather_t) {
     push_proper_dial_window();
@@ -150,8 +70,8 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
         time_t now_time = time(NULL);
         s_weather.TemperatureKelvin = weather_temp_t->value->int32;
         s_weather.Condition = weather_condition_t->value->int32;
-        s_weather.Timestamp = now_time + (60 * 60);
-        prv_save_weather();
+        s_weather.Timestamp = now_time + (60 * 60); // Set timestamp for one hour from now
+        save_weather();
 
         // Ask watchface to update the display
         }
@@ -208,7 +128,7 @@ static void push_proper_dial_window() {
 }
 
 static void prv_init(void) {
-  prv_load_settings();
+  load_settings();
   
   // Open AppMessage connection
   app_message_register_inbox_received(prv_inbox_received_handler);

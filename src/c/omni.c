@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include "omni.h"
-#include "settings.h"
+#include "utils.h"
 #include "omni_paths.c"
 #include "debug_flags.h"
 
@@ -21,32 +21,13 @@ static GColor omni_color_data; //flight, so we can keep them up here
 static bool omni_time_showing;
 static AppTimer *s_tap_timer;
 
-ClaySettings omni_settings;
-
-/* ----------- Settings funcs ----------*/
-
-static void omni_default_settings() {
-  omni_settings.DialMode = 'c';
-  omni_settings.HideUI = false;
-  omni_settings.DoColorOverride = false;
-  omni_settings.CustomColor = GColorWhite;
-  omni_settings.HighContrast = false;
-  omni_settings.DoWeather = false;
-  omni_settings.WeatherUnits = 'f';
-}
-
-static void omni_load_settings() {
-  omni_default_settings();
-  persist_read_data(SETTINGS_KEY, &omni_settings, sizeof(omni_settings));
-}
-
 /* ---------- Event Service Handlers ---------- */
 
 static void prv_omni_update_date();
 static void omni_tick_handler(struct tm *tick_time, TimeUnits changed) {
   layer_mark_dirty(s_layer_background);
   if ((changed & DAY_UNIT) != 0) { prv_omni_update_date(); }
-  if ((changed & HOUR_UNIT) != 0 && omni_settings.DoWeather) { /*request weather*/ }
+  if ((changed & HOUR_UNIT) != 0 && s_settings.DoWeather) { /*request weather*/ }
 }
 
 static void omni_battery_callback(BatteryChargeState state) {
@@ -63,7 +44,7 @@ static void omni_bluetooth_callback(bool connected) {
 
 static void prv_omni_ui_set_hidden(bool value);
 static void omni_tap_timer_handler(void *data) {
-  if (omni_settings.HideUI) {
+  if (s_settings.HideUI) {
     prv_omni_ui_set_hidden(true);
     s_tap_timer = NULL;
   }
@@ -92,7 +73,7 @@ static void prv_omni_update_date() {
 static GColor prv_omni_color() {
   GColor color = PAL_OMNI_STRIPES;
   #if defined(PBL_COLOR)
-  if (omni_settings.DoColorOverride) { color = omni_settings.CustomColor; }
+  if (s_settings.DoColorOverride) { color = s_settings.CustomColor; }
   #endif
   return color;
 }
@@ -100,12 +81,12 @@ static GColor prv_omni_color() {
 static GColor prv_omni_data_color() {
   GColor color = PAL_OMNI_DATA;
   #if defined(PBL_COLOR)
-  if (omni_settings.HighContrast) {
+  if (s_settings.HighContrast) {
     color = gcolor_legible_over(prv_omni_color());
     return color;
   }
 
-  if (omni_settings.DoColorOverride) { color = gcolor_legible_over(omni_settings.CustomColor); }
+  if (s_settings.DoColorOverride) { color = gcolor_legible_over(s_settings.CustomColor); }
   #endif
   return color;
 }
@@ -126,7 +107,7 @@ static void prv_omni_ui_set_hidden(bool value) {
   
   omni_time_showing = !value;
   layer_set_hidden(text_layer_get_layer(s_layer_date), value);
-  if (omni_settings.DoWeather) { layer_set_hidden(text_layer_get_layer(s_layer_weather), value); }
+  if (s_settings.DoWeather) { layer_set_hidden(text_layer_get_layer(s_layer_weather), value); }
   layer_mark_dirty(s_layer_background);
 }
 
@@ -153,7 +134,7 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     gpath_draw_filled(ctx, s_path_green_stripes);
 
     // Draw time
-    if (!omni_settings.HideUI || omni_time_showing) {
+    if (!s_settings.HideUI || omni_time_showing) {
     if (!omni_font_time) {
       omni_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ALATSI_56));
     }
@@ -213,7 +194,7 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
 /* ---------- Life cycle ----------*/
 
 static void omni_window_load(Window *window) {
-  omni_load_settings();
+  load_settings();
 
   //Set up event handlers
   tick_timer_service_subscribe(MINUTE_UNIT | HOUR_UNIT | DAY_UNIT, omni_tick_handler);
@@ -221,7 +202,7 @@ static void omni_window_load(Window *window) {
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = omni_bluetooth_callback
   });
-  if (omni_settings.HideUI) { accel_tap_service_subscribe(omni_accel_tap_handler); }
+  if (s_settings.HideUI) { accel_tap_service_subscribe(omni_accel_tap_handler); }
 
   //Store main color
   omni_color_main = prv_omni_color();
@@ -243,7 +224,7 @@ static void omni_window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(s_layer_date));
   prv_omni_update_date();
 
-  if (omni_settings.DoWeather) {
+  if (s_settings.DoWeather) {
     //Weather layer
     s_layer_weather = text_layer_create(BOUND_OMNI_WEATHER);
     text_layer_set_text_color(s_layer_weather, omni_color_data);
@@ -254,7 +235,7 @@ static void omni_window_load(Window *window) {
     layer_add_child(window_layer, text_layer_get_layer(s_layer_weather));
   }
 
-  prv_omni_ui_set_hidden(omni_settings.HideUI);
+  prv_omni_ui_set_hidden(s_settings.HideUI);
 }
 
 static void omni_window_unload(Window *window) {
