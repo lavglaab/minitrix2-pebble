@@ -201,4 +201,11 @@ void omni_window_unload(Window *window) {
   layer_destroy(s_layer_background);
   text_layer_destroy(s_layer_date);
   text_layer_destroy(s_layer_weather);
+
+  if (omni_font_time) { fonts_unload_custom_font(omni_font_time); }
+
+  if (s_path_green_stripes) { gpath_destroy(s_path_green_stripes); }
+  if (s_path_mask_inner) { gpath_destroy(s_path_mask_inner); }
+  if (s_path_stroke_inner) { gpath_destroy(s_path_stroke_inner); }
+  if (s_path_stroke_outer) { gpath_destroy(s_path_stroke_outer); }
 }

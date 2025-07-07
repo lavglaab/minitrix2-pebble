@@ -203,4 +203,10 @@ void classic_window_unload(Window *window) {
   layer_destroy(s_layer_background);
   text_layer_destroy(s_layer_date);
   text_layer_destroy(s_layer_weather);
+
+  if (classic_font_time) { fonts_unload_custom_font(classic_font_time); }
+  
+  if (s_path_carets_black) { gpath_destroy(s_path_carets_black); }
+  if (s_path_jewel) { gpath_destroy(s_path_jewel); }
+  if (s_path_jewelstroke) { gpath_destroy(s_path_jewelstroke); }
 }
