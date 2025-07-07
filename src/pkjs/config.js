@@ -13,12 +13,12 @@ module.exports = [
         "items": [
             {
                 "type": "heading",
-                "defaultValue": "UI"
+                "defaultValue": "Dial"
             },
             {
                 "type": "radiogroup",
                 "defaultValue": "c",
-                "label": "Dial mode",
+                "label": "Dial style",
                 "messageKey": "PrefDialMode",
                 "options": [
                     {
@@ -37,7 +37,7 @@ module.exports = [
             },
             {
                 "type": "toggle",
-                "label": "Hide UI",
+                "label": "Hide text",
                 "description": "To see the time and information, shake your watch",
                 "defaultValue": false,
                 "messageKey": "PrefHideUI"
