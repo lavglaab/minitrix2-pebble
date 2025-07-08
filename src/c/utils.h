@@ -33,8 +33,8 @@ typedef struct WeatherData{
     int Timestamp; // Time of expiry, stamped upon receipt of data
 } __attribute__((__packed__)) WeatherData;
 
-static WeatherData s_weather;
-static bool s_js_ready;
+WeatherData s_weather;
+bool s_js_ready;
 
 void load_weather();
 

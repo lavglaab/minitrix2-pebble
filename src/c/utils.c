@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "utils.h"
+#include "debug_flags.h"
 
 /* ---------- Settings ---------- */
 ClaySettings s_settings;
@@ -24,22 +25,28 @@ void save_settings() {
 }
 
 /* ---------- Weather Data ---------- */
-static WeatherData s_weather;
-static bool s_js_ready = false;
+WeatherData s_weather;
+bool s_js_ready = false;
 
 void load_weather() {
   s_weather.Condition = 0;
   s_weather.TemperatureKelvin = 0;
   s_weather.Timestamp = 0;
-  persist_read_data(WEATHER_KEY, &s_weather, sizeof(s_weather));
+  persist_read_data(WEATHER_KEY, &s_weather, sizeof(WeatherData));
+  LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "Loaded weather: Condition %d, Temp %d, Timestamp %d", (int)s_weather.Condition, (int)s_weather.TemperatureKelvin, (int)s_weather.Timestamp);
 }
 
 void save_weather() {
-  persist_write_data(WEATHER_KEY, &s_weather, sizeof(s_weather));
+  LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "Saving weather: Condition %d, Temp %d, Timestamp %d", (int)s_weather.Condition, (int)s_weather.TemperatureKelvin, (int)s_weather.Timestamp);
+  int result = persist_write_data(WEATHER_KEY, &s_weather, sizeof(WeatherData));
+  LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "persist_write_data return code %d", result);
 }
 
 bool request_new_weather() {
-  if (!s_js_ready) { return false; }
+  if (!s_js_ready) {
+    LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "Requested weather before JS ready");
+    return false;
+}
 
   // Declare the dictionary's iterator
   DictionaryIterator *out_iter;
@@ -72,7 +79,9 @@ bool has_saved_weather() {
      the future, or 0 (nonexistent). If the
      timestamp is in the future, we have
      valid saved weather. */ 
-  return !(now_time > s_weather.Timestamp);
+  bool saved_weather_present = !(now_time > s_weather.Timestamp);
+  LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, saved_weather_present ? "Saved weather present" : "No saved weather");
+  return saved_weather_present;
 }
 
 /* ---------- Weather Icons ---------- */

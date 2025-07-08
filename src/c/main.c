@@ -24,7 +24,9 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   if(js_ready_t && s_settings.DoWeather) {
     s_js_ready = true;
     LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_INFO, "JS is ready! Asking for weather");
-    request_new_weather();
+    if (!has_saved_weather()) {
+      request_new_weather();
+    }
   }
   
   /* ---- Settings ---- */
@@ -66,25 +68,30 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   if(weather_returncode_t) {
     // We either got new weather, or an error
     int weather_returncode = weather_returncode_t->value->int32;
+    // LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "Weather returncode present");
 
     switch (weather_returncode) {
       case 0:
         // OK, we should also have data
         {
+        LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "Weather return code 0, got data");
         Tuple *weather_temp_t = dict_find(iter, MESSAGE_KEY_WeatherTemperatureK);
         Tuple *weather_condition_t = dict_find(iter, MESSAGE_KEY_WeatherCondition);
         time_t now_time = time(NULL);
         s_weather.TemperatureKelvin = weather_temp_t->value->int32;
         s_weather.Condition = weather_condition_t->value->int32;
         s_weather.Timestamp = now_time + (60 * (1 * 60)); // Set timestamp for one hour from now
+        LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "Received weather: Condition %d, Temp %d, Timestamp %d", (int)s_weather.Condition, (int)s_weather.TemperatureKelvin, (int)s_weather.Timestamp);
         save_weather();
         }
         break;
       case 1:
         // Some kind of error fetching data
+        LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "Weather return code 1, error fetching data");
         break;
       case 2:
         // User hasn't provided a token
+        LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_DEBUG, "Weather return code 2, no token from user");
         break;
     }
     common_update_weather(weather_returncode); // Update dial display
