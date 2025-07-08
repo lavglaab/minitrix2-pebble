@@ -1,7 +1,6 @@
 #include <pebble.h>
 #include "utils.h"
 #include "classic.h"
-#include "classic_paths.c"
 #include "debug_flags.h"
 
 static Layer *s_layer_background;
@@ -10,9 +9,9 @@ static TextLayer *s_layer_weather;
 
 static GFont classic_font_time;
 
-static GPath *s_path_carets_black;
-static GPath *s_path_jewel;
-static GPath *s_path_jewelstroke;
+static GDrawCommandImage *s_pdc_classic_carets;
+static GDrawCommandImage *s_pdc_classic_jewel;
+static GDrawCommandImage *s_pdc_classic_jewel_stroke;
 
 static GColor classic_color_background;
 
@@ -78,22 +77,19 @@ void classic_ui_set_hidden(bool value) {
 static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "update_proc_classic_bg");
     GRect bounds = layer_get_bounds(layer);
+    GPoint origin = GPoint(0, 0);
 
-    if (!s_path_carets_black) { s_path_carets_black = gpath_create(&PATH_BLACK_CARET); }
-    if (!s_path_jewel) {s_path_jewel = gpath_create(&PATH_JEWEL); }
-    if (!s_path_jewelstroke) { s_path_jewelstroke = gpath_create(&PATH_JEWELSTROKE); }
+    if (!s_pdc_classic_carets) { s_pdc_classic_carets = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_CARETS); }
+    if (!s_pdc_classic_jewel) { s_pdc_classic_jewel = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_JEWEL); }
+    if (!s_pdc_classic_jewel_stroke) { s_pdc_classic_jewel_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_JEWEL_STROKE); }
     
     //Clear canvas
     graphics_context_set_fill_color(ctx, classic_color_background);
     graphics_fill_rect(ctx, bounds, 0, GCornersAll);
+
+
     //Black carets
-    graphics_context_set_fill_color(ctx, PAL_CLASSIC_BLACK_CARETS);
-    gpath_rotate_to(s_path_carets_black, DEG_TO_TRIGANGLE(0));
-    gpath_move_to(s_path_carets_black, GPoint(-1, 0));
-    gpath_draw_filled(ctx, s_path_carets_black);
-    gpath_rotate_to(s_path_carets_black, DEG_TO_TRIGANGLE(180));
-    gpath_move_to(s_path_carets_black, GPoint(bounds.size.w, bounds.size.h));
-    gpath_draw_filled(ctx, s_path_carets_black);
+    gdraw_command_image_draw(ctx, s_pdc_classic_carets, origin);
 
     // Draw time
     if (!s_settings.HideUI || classic_time_showing) {
@@ -145,20 +141,10 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     }
 
     //Jewel
-    graphics_context_set_fill_color(ctx, prv_classic_jewel_color());
-    gpath_move_to(s_path_jewel, GPoint(0, 0));
-    gpath_draw_filled(ctx, s_path_jewel);
+    gdraw_command_image_draw(ctx, s_pdc_classic_jewel, origin);
     
     //Jewel stroke
-    graphics_context_set_stroke_color(ctx, PAL_CLASSIC_BLACK_CARETS);
-    graphics_context_set_stroke_width(ctx, 2);
-    gpath_rotate_to(s_path_jewelstroke, DEG_TO_TRIGANGLE(0));
-    gpath_move_to(s_path_jewelstroke, GPoint(-1, 0));
-    gpath_draw_outline_open(ctx, s_path_jewelstroke);
-
-    gpath_rotate_to(s_path_jewelstroke, DEG_TO_TRIGANGLE(180));
-    gpath_move_to(s_path_jewelstroke, GPoint(bounds.size.w, bounds.size.h-1));
-    gpath_draw_outline_open(ctx, s_path_jewelstroke);
+    gdraw_command_image_draw(ctx, s_pdc_classic_jewel_stroke, origin);
 }
 
 /* ---------- Life cycle ----------*/
@@ -203,4 +189,10 @@ void classic_window_unload(Window *window) {
   layer_destroy(s_layer_background);
   text_layer_destroy(s_layer_date);
   text_layer_destroy(s_layer_weather);
+
+  if (classic_font_time) { fonts_unload_custom_font(classic_font_time); }
+
+  if (s_pdc_classic_carets) { gdraw_command_image_destroy(s_pdc_classic_carets); }
+  if (s_pdc_classic_jewel) { gdraw_command_image_destroy(s_pdc_classic_jewel); }
+  if (s_pdc_classic_jewel_stroke) { gdraw_command_image_destroy(s_pdc_classic_jewel_stroke); }
 }
