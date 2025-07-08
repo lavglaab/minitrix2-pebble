@@ -65,6 +65,41 @@
           "characterRegex": "[0-9]"
         },
 
+        
+        {
+          "type": "raw",
+          "name": "PATH_CLASSIC_CARETS",
+          "file": "classic/classic-carets.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "PATH_CLASSIC_JEWEL",
+          "file": "classic/classic-jewel.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "PATH_CLASSIC_JEWEL_STROKE",
+          "file": "classic/classic-jewel-stroke.pdc"
+        },
+
+        {
+          "type": "raw",
+          "name": "PATH_OMNI_JEWEL",
+          "file": "omniverse/omni-jewel.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "PATH_OMNI_CARETS",
+          "file": "omniverse/omni-carets.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "PATH_OMNI_CARET_STROKE",
+          "file": "omniverse/omni-caret-stroke.pdc"
+        },
+
+
+
         {
           "type": "raw",
           "name": "W_CLEAR_DAY",
