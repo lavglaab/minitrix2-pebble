@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "classic.h"
 #include "debug_flags.h"
+#include "colorize_pdc.h"
 
 static Layer *s_layer_background;
 static TextLayer *s_layer_date;
@@ -10,7 +11,6 @@ static TextLayer *s_layer_weather;
 static GFont classic_font_time;
 
 static GDrawCommandImage *s_pdc_classic_carets;
-static GDrawCommandImage *s_pdc_classic_jewel;
 static GDrawCommandImage *s_pdc_classic_jewel_stroke;
 
 static GColor classic_color_background;
@@ -80,7 +80,6 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     GPoint origin = GPoint(0, 0);
 
     if (!s_pdc_classic_carets) { s_pdc_classic_carets = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_CARETS); }
-    if (!s_pdc_classic_jewel) { s_pdc_classic_jewel = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_JEWEL); }
     if (!s_pdc_classic_jewel_stroke) { s_pdc_classic_jewel_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_JEWEL_STROKE); }
     
     //Clear canvas
@@ -141,7 +140,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     }
 
     //Jewel
-    gdraw_command_image_draw(ctx, s_pdc_classic_jewel, origin);
+    draw_pdc_colorized(ctx, RESOURCE_ID_PATH_CLASSIC_JEWEL, prv_classic_jewel_color(), origin);
     
     //Jewel stroke
     gdraw_command_image_draw(ctx, s_pdc_classic_jewel_stroke, origin);
@@ -193,6 +192,5 @@ void classic_window_unload(Window *window) {
   if (classic_font_time) { fonts_unload_custom_font(classic_font_time); }
 
   if (s_pdc_classic_carets) { gdraw_command_image_destroy(s_pdc_classic_carets); }
-  if (s_pdc_classic_jewel) { gdraw_command_image_destroy(s_pdc_classic_jewel); }
   if (s_pdc_classic_jewel_stroke) { gdraw_command_image_destroy(s_pdc_classic_jewel_stroke); }
 }

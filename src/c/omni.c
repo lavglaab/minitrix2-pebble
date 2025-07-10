@@ -2,6 +2,7 @@
 #include "omni.h"
 #include "utils.h"
 #include "debug_flags.h"
+#include "colorize_pdc.h"
 
 static Layer *s_layer_background;
 static TextLayer *s_layer_date;
@@ -9,8 +10,6 @@ static TextLayer *s_layer_weather;
 
 static GFont omni_font_time;
 
-static GDrawCommandImage *s_pdc_omni_jewel;
-static GDrawCommandImage *s_pdc_omni_carets;
 static GDrawCommandImage *s_pdc_omni_caret_stroke;
 
 static GColor omni_color_main; //These don't actually change in 
@@ -82,8 +81,6 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     GRect bounds = layer_get_bounds(layer);
     GPoint origin = GPoint(0, 0);
 
-    if (!s_pdc_omni_jewel) { s_pdc_omni_jewel = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_JEWEL); }
-    if (!s_pdc_omni_carets) { s_pdc_omni_carets = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARETS); }
     if (!s_pdc_omni_caret_stroke) {s_pdc_omni_caret_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARET_STROKE); }
     
     //Clear canvas
@@ -91,10 +88,10 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     graphics_fill_rect(ctx, bounds, 0, GCornersAll);
 
     //Status jewel
-    gdraw_command_image_draw(ctx, s_pdc_omni_jewel, origin);
+    draw_pdc_colorized(ctx, RESOURCE_ID_PATH_OMNI_JEWEL, prv_omni_color_status(), origin);
 
     //Green carets
-    gdraw_command_image_draw(ctx, s_pdc_omni_carets, origin); 
+    draw_pdc_colorized(ctx, RESOURCE_ID_PATH_OMNI_CARETS, prv_omni_color(), origin);
 
     // Draw time
     if (!s_settings.HideUI || omni_time_showing) {
@@ -181,7 +178,5 @@ void omni_window_unload(Window *window) {
 
   if (omni_font_time) { fonts_unload_custom_font(omni_font_time); }
 
-  if (s_pdc_omni_jewel) { gdraw_command_image_destroy(s_pdc_omni_jewel); }
-  if (s_pdc_omni_carets) { gdraw_command_image_destroy(s_pdc_omni_carets); }
   if (s_pdc_omni_caret_stroke) { gdraw_command_image_destroy(s_pdc_omni_caret_stroke); }
 }
