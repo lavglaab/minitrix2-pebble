@@ -1,8 +1,8 @@
 #include <pebble.h>
 #include "omni.h"
 #include "utils.h"
-#include "omni_paths.c"
 #include "debug_flags.h"
+#include "colorize_pdc.h"
 
 static Layer *s_layer_background;
 static TextLayer *s_layer_date;
@@ -10,10 +10,7 @@ static TextLayer *s_layer_weather;
 
 static GFont omni_font_time;
 
-static GPath *s_path_green_stripes;
-static GPath *s_path_mask_inner;
-static GPath *s_path_stroke_inner;
-static GPath *s_path_stroke_outer;
+static GDrawCommandImage *s_pdc_omni_caret_stroke;
 
 static GColor omni_color_main; //These don't actually change in 
 static GColor omni_color_data; //flight, so we can keep them up here
@@ -82,24 +79,19 @@ void omni_ui_set_hidden(bool value) {
 static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "update_proc_omni_bg");
     GRect bounds = layer_get_bounds(layer);
+    GPoint origin = GPoint(0, 0);
 
-    if (!s_path_green_stripes) { s_path_green_stripes = gpath_create(&PATH_GREEN_STRIPE); }
-    if (!s_path_mask_inner) { s_path_mask_inner = gpath_create(&PATH_INNER_MASK); }
-    if (!s_path_stroke_outer) {s_path_stroke_outer = gpath_create(&PATH_STRIPE_STROKE_OUTER); }
-    if (!s_path_stroke_inner) {s_path_stroke_inner = gpath_create(&PATH_STRIPE_STROKE_INNER); }
+    if (!s_pdc_omni_caret_stroke) {s_pdc_omni_caret_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARET_STROKE); }
     
     //Clear canvas
     graphics_context_set_fill_color(ctx, PAL_OMNI_BG);
     graphics_fill_rect(ctx, bounds, 0, GCornersAll);
-    //Green carets
-    graphics_context_set_fill_color(ctx, omni_color_main);
-    gpath_rotate_to(s_path_green_stripes, DEG_TO_TRIGANGLE(0));
-    gpath_move_to(s_path_green_stripes, GPoint(-1, 0));
-    gpath_draw_filled(ctx, s_path_green_stripes);
 
-    gpath_rotate_to(s_path_green_stripes, DEG_TO_TRIGANGLE(180));
-    gpath_move_to(s_path_green_stripes, GPoint(bounds.size.w, bounds.size.h-1));
-    gpath_draw_filled(ctx, s_path_green_stripes);
+    //Status jewel
+    draw_pdc_colorized(ctx, RESOURCE_ID_PATH_OMNI_JEWEL, prv_omni_color_status(), origin);
+
+    //Green carets
+    draw_pdc_colorized(ctx, RESOURCE_ID_PATH_OMNI_CARETS, prv_omni_color(), origin);
 
     // Draw time
     if (!s_settings.HideUI || omni_time_showing) {
@@ -136,27 +128,9 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     graphics_draw_text(ctx, om1, omni_font_time, BOUND_OMNI_TIME_M1, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute1
     graphics_draw_text(ctx, om2, omni_font_time, BOUND_OMNI_TIME_M2, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute2
     }
-
-    //Mask inside stripes
-    graphics_context_set_fill_color(ctx, omni_color_status);
-    gpath_draw_filled(ctx, s_path_mask_inner);
     
     //Caret stroke
-    graphics_context_set_stroke_color(ctx, PAL_OMNI_BG);
-    graphics_context_set_stroke_width(ctx, 4);
-    gpath_rotate_to(s_path_stroke_inner, DEG_TO_TRIGANGLE(0));
-    gpath_rotate_to(s_path_stroke_outer, DEG_TO_TRIGANGLE(0));
-    gpath_move_to(s_path_stroke_outer, GPoint(-1,0));
-    gpath_move_to(s_path_stroke_inner, GPoint(-1,0));
-    gpath_draw_outline_open(ctx, s_path_stroke_outer);
-    gpath_draw_outline_open(ctx, s_path_stroke_inner);
-
-    gpath_rotate_to(s_path_stroke_inner, DEG_TO_TRIGANGLE(180));
-    gpath_rotate_to(s_path_stroke_outer, DEG_TO_TRIGANGLE(180));
-    gpath_move_to(s_path_stroke_outer, GPoint(bounds.size.w, bounds.size.h-1));
-    gpath_move_to(s_path_stroke_inner, GPoint(bounds.size.w, bounds.size.h-1));
-    gpath_draw_outline_open(ctx, s_path_stroke_outer);
-    gpath_draw_outline_open(ctx, s_path_stroke_inner);
+    gdraw_command_image_draw(ctx, s_pdc_omni_caret_stroke, origin);
 }
 
 /* ---------- Life cycle ----------*/
@@ -204,8 +178,5 @@ void omni_window_unload(Window *window) {
 
   if (omni_font_time) { fonts_unload_custom_font(omni_font_time); }
 
-  if (s_path_green_stripes) { gpath_destroy(s_path_green_stripes); }
-  if (s_path_mask_inner) { gpath_destroy(s_path_mask_inner); }
-  if (s_path_stroke_inner) { gpath_destroy(s_path_stroke_inner); }
-  if (s_path_stroke_outer) { gpath_destroy(s_path_stroke_outer); }
+  if (s_pdc_omni_caret_stroke) { gdraw_command_image_destroy(s_pdc_omni_caret_stroke); }
 }
