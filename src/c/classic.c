@@ -191,6 +191,7 @@ void classic_window_unload(Window *window) {
 
   if (classic_font_time) { fonts_unload_custom_font(classic_font_time); }
 
+
   if (s_pdc_classic_carets) { gdraw_command_image_destroy(s_pdc_classic_carets); }
   if (s_pdc_classic_jewel_stroke) { gdraw_command_image_destroy(s_pdc_classic_jewel_stroke); }
 }
