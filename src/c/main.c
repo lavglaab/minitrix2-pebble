@@ -24,7 +24,9 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   if(js_ready_t && s_settings.DoWeather) {
     s_js_ready = true;
     LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_INFO, "JS is ready! Asking for weather");
-    if (!has_saved_weather()) {
+    if (has_saved_weather()) {
+      common_update_weather(0);
+    } else {
       request_new_weather();
     }
   }
