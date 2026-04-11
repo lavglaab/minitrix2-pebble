@@ -12,6 +12,7 @@ static bool prv_draw_command_list_in_color_cb(GDrawCommand *command,
                                               uint32_t index, void *context) {
   ColorCBContext *color = context;
   gdraw_command_set_fill_color(command, color->color);
+  gdraw_command_set_stroke_color(command, color->color);
   return true;
 }
 

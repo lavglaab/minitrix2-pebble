@@ -1,5 +1,5 @@
 // Import the Clay package
-var Clay = require('pebble-clay');
+var Clay = require('@rebble/clay');
 // Load our Clay configuration file
 var clayConfig = require('./config');
 // Initialize Clay
@@ -12,10 +12,10 @@ Pebble.addEventListener('webviewclosed',
         if (e && !e.response) {
           return;
         }
-      
+
         // Get the keys and values from each config item
         var dict = clay.getSettings(e.response);
-      
+
         // Send settings values to watch side
         Pebble.sendAppMessage(dict, function(e) {
           console.log('Sent config data to Pebble');
@@ -41,7 +41,7 @@ Pebble.addEventListener('webviewclosed',
 
 
 // Listen for when the watchface is opened
-Pebble.addEventListener('ready', 
+Pebble.addEventListener('ready',
   function(e) {
     console.log('PebbleKit JS ready!');
     if (localStorage.getItem("WeatherToken")) {
@@ -74,7 +74,7 @@ Pebble.addEventListener('appmessage',
                 // Watch has asked us to get the weather
                 getWeather();
         }
-  }                     
+  }
 );
 
 function locationSuccess(pos) {
@@ -94,7 +94,7 @@ function locationSuccess(pos) {
                 console.log('Temperature is ' + temperature);
 
                 // Conditions
-                var conditions = json.weather[0].main;      
+                var conditions = json.weather[0].main;
                 console.log('Conditions are ' + conditions);
 
                 var dict = {
@@ -102,7 +102,7 @@ function locationSuccess(pos) {
                         'WeatherTemperatureK': temperature,
                         'WeatherCondition': conditions
                 };
-        
+
                 // Send the object
                 Pebble.sendAppMessage(dict, function() {
                 console.log('Message sent successfully: ' + JSON.stringify(dict));
@@ -113,7 +113,7 @@ function locationSuccess(pos) {
         xhrRequest.open('GET', url);
         xhrRequest.send();
 }
-      
+
 function locationError(err) {
         console.log('Error requesting location: ' + err.message);
         // Send error to watch
@@ -121,7 +121,7 @@ function locationError(err) {
 }
 
 function getWeather() {
-        
+
         if (!localStorage.getItem("WeatherToken")) {
                 // User hasn't set a token, throw an error to the watch
                 sendWeatherError(2); // where 2=NoToken
@@ -131,7 +131,7 @@ function getWeather() {
         navigator.geolocation.getCurrentPosition(
                 locationSuccess,
                 locationError,
-                {timeout: 15000, maximumAge: 60000});   
+                {timeout: 15000, maximumAge: 60000});
 }
 
 function sendWeatherError(exitCode) {

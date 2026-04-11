@@ -26,7 +26,7 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_INFO, "JS is ready! Asking for weather");
     request_new_weather();
   }
-  
+
   /* ---- Settings ---- */
   // UI
   Tuple *dial_mode_t = dict_find(iter, MESSAGE_KEY_PrefDialMode);
@@ -163,7 +163,7 @@ static void prv_push_window_classic() {
   LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Pushing classic window");
   if (s_window_classic) {
     window_destroy(s_window_classic);
-    s_window_classic = NULL;  
+    s_window_classic = NULL;
   }
   s_window_classic = window_create();
   window_set_window_handlers(s_window_classic, (WindowHandlers) {
@@ -177,7 +177,7 @@ static void prv_push_window_omni() {
   LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Pushing omni window");
   if (s_window_omni) {
     window_destroy(s_window_omni);
-    s_window_omni = NULL;  
+    s_window_omni = NULL;
   }
   s_window_omni = window_create();
   window_set_window_handlers(s_window_omni, (WindowHandlers) {
@@ -216,7 +216,7 @@ static void prv_init(void) {
   // Open AppMessage connection
   app_message_register_inbox_received(prv_inbox_received_handler);
   app_message_open(128, 128);
-  
+
   push_proper_dial_window();
 }
 

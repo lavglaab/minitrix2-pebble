@@ -7,7 +7,7 @@
   ],
   "private": true,
   "dependencies": {
-    "pebble-clay": "^1.0.4"
+    "@rebble/clay": "^1.0.8"
   },
   "pebble": {
     "displayName": "Minitrix2",
@@ -22,20 +22,21 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite"
+      "diorite",
+      "flint",
+      "emery",
+      "gabbro"
     ],
     "watchapp": {
       "watchface": true
     },
     "messageKeys": [
       "JSReady",
-      
       "PrefDialMode",
       "PrefHideUI",
       "PrefHighContrast",
       "PrefDoColorOverride",
       "PrefOverrideColor",
-
       "PrefDoWeather",
       "PrefWeatherUnits",
       "WeatherToken",
@@ -64,42 +65,36 @@
           "file": "Alatsi-Regular.ttf",
           "characterRegex": "[0-9]"
         },
-
-        
         {
           "type": "raw",
           "name": "PATH_CLASSIC_CARETS",
-          "file": "classic/classic-carets.pdc"
+          "file": "classic/classic-scl-carets.pdc"
         },
         {
           "type": "raw",
           "name": "PATH_CLASSIC_JEWEL",
-          "file": "classic/classic-jewel.pdc"
+          "file": "classic/classic-scl-jewel.pdc"
         },
         {
           "type": "raw",
           "name": "PATH_CLASSIC_JEWEL_STROKE",
-          "file": "classic/classic-jewel-stroke.pdc"
+          "file": "classic/classic-scl-jewel-stroke.pdc"
         },
-
         {
           "type": "raw",
           "name": "PATH_OMNI_JEWEL",
-          "file": "omniverse/omni-jewel.pdc"
+          "file": "omniverse/omni-scl-jewel.pdc"
         },
         {
           "type": "raw",
           "name": "PATH_OMNI_CARETS",
-          "file": "omniverse/omni-carets.pdc"
+          "file": "omniverse/omni-scl-carets.pdc"
         },
         {
           "type": "raw",
           "name": "PATH_OMNI_CARET_STROKE",
-          "file": "omniverse/omni-caret-stroke.pdc"
+          "file": "omniverse/omni-scl-caret-stroke.pdc"
         },
-
-
-
         {
           "type": "raw",
           "name": "W_CLEAR_DAY",
