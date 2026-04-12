@@ -2,3 +2,5 @@
 
 void scale_draw_command_list(GDrawCommandList *list, float scale_factor);
 void scale_draw_command_image(GDrawCommandImage *image, float scale_factor);
+
+void draw_command_image_fill_size(GDrawCommandImage *image, GSize size);

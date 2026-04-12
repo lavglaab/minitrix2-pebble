@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "debug_flags.h"
 #include "colorize_pdc.h"
+#include "scale_pdc.h"
 
 static Layer *s_layer_background;
 static TextLayer *s_layer_date;
@@ -10,9 +11,13 @@ static TextLayer *s_layer_weather;
 
 static GFont omni_font_time;
 
+static GPoint s_image_origin = GPoint(0,0);
+
+static GDrawCommandImage *s_pdc_omni_jewel;
+static GDrawCommandImage *s_pdc_omni_carets;
 static GDrawCommandImage *s_pdc_omni_caret_stroke;
 
-static GColor omni_color_main; //These don't actually change in 
+static GColor omni_color_main; //These don't actually change in
 static GColor omni_color_data; //flight, so we can keep them up here
 static GColor omni_color_status; // this one does though
 
@@ -64,8 +69,17 @@ void omni_update_weather(int response_code) {
 }
 
 void omni_update_style() {
-  omni_color_status = prv_omni_color_status();
-  layer_mark_dirty(s_layer_background);
+    // Set colors
+    omni_color_status = prv_omni_color_status();
+    omni_color_data = prv_omni_color_data();
+    omni_color_main = prv_omni_color();
+
+    // Recolor text
+    text_layer_set_text_color(s_layer_date, omni_color_data);
+    if (s_layer_weather) { text_layer_set_text_color(s_layer_weather, omni_color_data); }
+
+    // Redraw everything
+    layer_mark_dirty(s_layer_background);
 }
 
 void omni_ui_set_hidden(bool value) {
@@ -75,23 +89,46 @@ void omni_ui_set_hidden(bool value) {
   layer_mark_dirty(s_layer_background);
 }
 
+static void prv_init_pdc_images() {
+    if (!s_pdc_omni_jewel) { s_pdc_omni_jewel = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_JEWEL); }
+    if (!s_pdc_omni_carets) { s_pdc_omni_carets = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARETS); }
+    if (!s_pdc_omni_caret_stroke) { s_pdc_omni_caret_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARET_STROKE); }
+}
+
 /* ---------- Update Procs ---------- */
 static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "update_proc_omni_bg");
-    GRect bounds = layer_get_bounds(layer);
-    GPoint origin = GPoint(0, 0);
+    GRect bounds = layer_get_unobstructed_bounds(layer);
 
-    if (!s_pdc_omni_caret_stroke) {s_pdc_omni_caret_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARET_STROKE); }
-    
+    // make sure pdcs are loaded
+    prv_init_pdc_images();
+    // now resize them to fit the current bounds
+    draw_command_image_fill_size(s_pdc_omni_jewel, bounds.size);
+    draw_command_image_fill_size(s_pdc_omni_carets, bounds.size);
+    draw_command_image_fill_size(s_pdc_omni_caret_stroke, bounds.size);
+
+    // center scaled pdcs within display bounds
+    // figure out how much larger image is than screen, and offset by half that
+    GSize full_size = gdraw_command_image_get_bounds_size(s_pdc_omni_carets);
+    int delta_x = full_size.w - bounds.size.w;
+    int delta_y = full_size.h - bounds.size.h;
+
+    if (delta_x != 0) { delta_x = (delta_x / 2) * -1; }
+    if (delta_y != 0) { delta_y = (delta_y / 2) * -1; }
+
+    s_image_origin = GPoint(delta_x, delta_y);
+
     //Clear canvas
     graphics_context_set_fill_color(ctx, PAL_OMNI_BG);
     graphics_fill_rect(ctx, bounds, 0, GCornersAll);
 
     //Status jewel
-    draw_pdc_colorized(ctx, RESOURCE_ID_PATH_OMNI_JEWEL, prv_omni_color_status(), origin);
+    draw_command_image_recolor(s_pdc_omni_jewel, omni_color_status);
+    gdraw_command_image_draw(ctx, s_pdc_omni_jewel, s_image_origin);
 
     //Green carets
-    draw_pdc_colorized(ctx, RESOURCE_ID_PATH_OMNI_CARETS, prv_omni_color(), origin);
+    draw_command_image_recolor(s_pdc_omni_carets, omni_color_main);
+    gdraw_command_image_draw(ctx, s_pdc_omni_carets, s_image_origin);
 
     // Draw time
     if (!s_settings.HideUI || omni_time_showing) {
@@ -122,25 +159,20 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     strncpy(oh2, omni_time_hour+1, 1);
     strncpy(om1, omni_time_minute+0, 1);
     strncpy(om2, omni_time_minute+1, 1);
-    
+
     graphics_draw_text(ctx, oh1, omni_font_time, BOUND_OMNI_TIME_H1, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour1
     graphics_draw_text(ctx, oh2, omni_font_time, BOUND_OMNI_TIME_H2, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour2
     graphics_draw_text(ctx, om1, omni_font_time, BOUND_OMNI_TIME_M1, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute1
     graphics_draw_text(ctx, om2, omni_font_time, BOUND_OMNI_TIME_M2, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute2
     }
-    
+
     //Caret stroke
-    gdraw_command_image_draw(ctx, s_pdc_omni_caret_stroke, origin);
+    gdraw_command_image_draw(ctx, s_pdc_omni_caret_stroke, s_image_origin);
 }
 
 /* ---------- Life cycle ----------*/
 
 void omni_window_load(Window *window) {
-  //Store main color
-  omni_color_main = prv_omni_color();
-  omni_color_data = prv_omni_color_data();
-  omni_color_status = prv_omni_color_status();
-
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
@@ -150,7 +182,6 @@ void omni_window_load(Window *window) {
 
   //Date layer
   s_layer_date = text_layer_create(BOUND_OMNI_DATE);
-  text_layer_set_text_color(s_layer_date, omni_color_data);
   text_layer_set_background_color(s_layer_date, GColorClear);
   text_layer_set_text_alignment(s_layer_date, GTextAlignmentLeft);
   text_layer_set_font(s_layer_date, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
@@ -160,7 +191,6 @@ void omni_window_load(Window *window) {
   if (s_settings.DoWeather) {
     //Weather layer
     s_layer_weather = text_layer_create(BOUND_OMNI_WEATHER);
-    text_layer_set_text_color(s_layer_weather, omni_color_data);
     text_layer_set_background_color(s_layer_weather, GColorClear);
     text_layer_set_text_alignment(s_layer_weather, GTextAlignmentRight);
     text_layer_set_font(s_layer_weather, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
@@ -168,6 +198,7 @@ void omni_window_load(Window *window) {
     layer_add_child(window_layer, text_layer_get_layer(s_layer_weather));
   }
 
+  omni_update_style();
   omni_ui_set_hidden(s_settings.HideUI);
 }
 
@@ -178,5 +209,7 @@ void omni_window_unload(Window *window) {
 
   if (omni_font_time) { fonts_unload_custom_font(omni_font_time); }
 
-  if (s_pdc_omni_caret_stroke) { gdraw_command_image_destroy(s_pdc_omni_caret_stroke); }
+  gdraw_command_image_destroy(s_pdc_omni_jewel);
+  gdraw_command_image_destroy(s_pdc_omni_carets);
+  gdraw_command_image_destroy(s_pdc_omni_caret_stroke);
 }

@@ -16,21 +16,10 @@ static bool prv_draw_command_list_in_color_cb(GDrawCommand *command,
   return true;
 }
 
-void draw_command_image_in_color(GDrawCommandImage *image, GColor color) {
+void draw_command_image_recolor(GDrawCommandImage *image, GColor color) {
   ColorCBContext ctx = {
       .color = color,
   };
   gdraw_command_list_iterate(gdraw_command_image_get_command_list(image),
                              prv_draw_command_list_in_color_cb, &ctx);
-}
-
-void draw_pdc_colorized(GContext *ctx, int resource, GColor color,
-                         GPoint origin) {
-  if (resource == 0)
-    return;
-
-  GDrawCommandImage *image = gdraw_command_image_create_with_resource(resource);
-  draw_command_image_in_color(image, color);
-  gdraw_command_image_draw(ctx, image, origin);
-  gdraw_command_image_destroy(image);
 }

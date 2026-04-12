@@ -1,7 +1,5 @@
 #include "scale_pdc.h"
 
-// static float s_scale_factor;
-
 typedef struct {
     float scale_factor;
 } ScalePointCBContext;
@@ -31,4 +29,22 @@ void scale_draw_command_list(GDrawCommandList *list, float scale_factor) {
 
 void scale_draw_command_image(GDrawCommandImage *image, float scale_factor) {
     scale_draw_command_list(gdraw_command_image_get_command_list(image), scale_factor);
+}
+
+static int prv_min(int a, int b) {
+    return (a <= b) ? a : b;
+}
+static int prv_max(int a, int b) {
+    return (a >= b) ? a : b;
+}
+
+void draw_command_image_fill_size(GDrawCommandImage *image, GSize size) {
+    GSize start_size = gdraw_command_image_get_bounds_size(image);
+    int start_dimen = prv_max(start_size.w, start_size.h);
+    int end_dimen = prv_max(size.w, size.h);
+    // So we want to scale our pdc such that its smallest edge is as large as the target's largest edge
+    float scale_factor = (float)end_dimen / (float)start_dimen; // these need to be floats, otherwise they will divide as ints and give an int result
+
+    scale_draw_command_image(image, scale_factor);
+    gdraw_command_image_set_bounds_size(image, GSize(end_dimen, end_dimen));
 }
