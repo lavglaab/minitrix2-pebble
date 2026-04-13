@@ -1,7 +1,8 @@
 #include <pebble.h>
-#include "utils.h"
-#include "classic.h"
-#include "omni.h"
+#include "settings.h"
+#include "weather.h"
+#include "windows/classic.h"
+#include "windows/omni.h"
 
 #include "debug_flags.h"
 

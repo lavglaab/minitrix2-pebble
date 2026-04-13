@@ -1,9 +1,10 @@
 #include <pebble.h>
 #include "omni.h"
-#include "utils.h"
-#include "debug_flags.h"
-#include "colorize_pdc.h"
-#include "scale_pdc.h"
+#include "../settings.h"
+#include "../weather.h"
+#include "../debug_flags.h"
+#include "../pdc/colorize_pdc.h"
+#include "../pdc/scale_pdc.h"
 
 static Layer *s_layer_background;
 static TextLayer *s_layer_date;
