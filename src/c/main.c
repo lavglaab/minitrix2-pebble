@@ -158,14 +158,29 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 
 /* ---------- Life cycle ---------- */
 
-const bool animated = true;
+const bool animated = false;
 
 static void prv_push_window_classic() {
-  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Pushing classic window");
-  if (s_window_classic) {
-    window_destroy(s_window_classic);
-    s_window_classic = NULL;
+  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_DEBUG, "prv_push_window_classic");
+  if (s_window_classic != NULL) {
+      LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Classic window already exists");
+      if (window_stack_get_top_window() == s_window_classic) {
+          LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Classic window already on top, updating style");
+          common_update_style();
+          return;
+      }
+      if (window_is_loaded(s_window_classic)) {
+          LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Classic window is already loaded, pushing");
+          window_stack_push(s_window_classic, animated);
+          return;
+      }
+
+      LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Destroying classic window");
+      window_destroy(s_window_classic);
+      s_window_classic = NULL;
   }
+
+  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Creating classic window");
   s_window_classic = window_create();
   window_set_window_handlers(s_window_classic, (WindowHandlers) {
     .load = classic_window_load,
@@ -175,11 +190,26 @@ static void prv_push_window_classic() {
 }
 
 static void prv_push_window_omni() {
-  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Pushing omni window");
-  if (s_window_omni) {
-    window_destroy(s_window_omni);
-    s_window_omni = NULL;
+  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_DEBUG, "prv_push_window_omni");
+  if (s_window_omni != NULL) {
+      LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "OV window already exists");
+      if (window_stack_get_top_window() == s_window_omni) {
+          LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "OV window already on top, updating style");
+          common_update_style();
+          return;
+      }
+      if (window_is_loaded(s_window_omni)) {
+          LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "OV window is already loaded, pushing");
+          window_stack_push(s_window_omni, animated);
+          return;
+      }
+
+      LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Destroying OV window");
+      window_destroy(s_window_omni);
+      s_window_omni = NULL;
   }
+
+  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Creating omni window");
   s_window_omni = window_create();
   window_set_window_handlers(s_window_omni, (WindowHandlers) {
     .load = omni_window_load,
@@ -207,10 +237,38 @@ static void prv_window_load_common() {
 }
 
 static void push_proper_dial_window() {
-  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Pushing proper dial window");
-  window_stack_pop_all(animated);
+  LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_DEBUG, "push_proper_dial_window");
+
   prv_window_load_common();
-  UI_IF_OMNI_ELSE(prv_push_window_omni(), prv_push_window_classic());
+
+  if (s_settings.DialMode == 'o') {
+      // omniverse dial path
+      LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "OV dial window codepath");
+
+      prv_push_window_omni();
+
+      if (window_stack_contains_window(s_window_classic)) {
+          LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Classic window in window stack, removing");
+          window_stack_remove(s_window_classic, animated);
+          LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Destroying classic window");
+          window_destroy(s_window_classic);
+          s_window_classic = NULL;
+      }
+  } else {
+      // classic/uaf dial path
+      LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Classic dial window codepath");
+
+      prv_push_window_classic();
+
+      if (window_stack_contains_window(s_window_omni)) {
+          LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Omni window in window stack, removing");
+          window_stack_remove(s_window_omni, animated);
+          LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Destroying omni window");
+          window_destroy(s_window_omni);
+          s_window_omni = NULL;
+      }
+  }
+
 }
 
 static void prv_init(void) {
