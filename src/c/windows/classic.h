@@ -27,16 +27,19 @@ void classic_window_unload(Window *window);
 #endif
 
 /* ---------- Text bounds ----------*/
-#if defined(PBL_RECT)
-#define BOUND_CLASSIC_TIME_H1 GRect(0,14,36,60)
-#define BOUND_CLASSIC_TIME_M1 GRect(0,74,36,60)
-#define BOUND_CLASSIC_TIME_H2 GRect(108,14,36,60)
-#define BOUND_CLASSIC_TIME_M2 GRect(108,74,36,60)
-#endif
+// #if defined(PBL_RECT)
+#define POINT_CLASSIC_TIME_RECT_X_SCL 15 // what are these fucking names, lav, what are we doing here
+#define POINT_CLASSIC_TIME_RECT_Y_SCL 35
+
+#define POINT_CLASSIC_TIME_TOP_LEFT GPoint(12, 34)
+#define POINT_CLASSIC_TIME_BOTTOM_LEFT GPoint(15, 100-35)
+#define POINT_CLASSIC_TIME_TOP_RIGHT GPoint(100-15, 35)
+#define POINT_CLASSIC_TIME_BOTTOM_RIGHT GPoint(100-15, 100-35)
+// #endif
 
 #if defined(PBL_ROUND)
-#define BOUND_CLASSIC_TIME_HOUR GRect(0,49,72,60)
-#define BOUND_CLASSIC_TIME_MINUTE GRect(108,49,72,60)
+#define POINT_CLASSIC_TIME_ROUND_X_SCL 18
+#define POINT_CLASSIC_TIME_ROUND_Y_SCL 50
 #endif
 
 #define BOUND_CLASSIC_DATE PBL_IF_RECT_ELSE(GRect(0,0,144,20), GRect(0,8,180,48))

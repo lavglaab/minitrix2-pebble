@@ -3,6 +3,7 @@
 #include "../settings.h"
 #include "../weather.h"
 #include "../debug_flags.h"
+#include "../text_drawing.h"
 #include "../pdc/colorize_pdc.h"
 #include "../pdc/scale_pdc.h"
 
@@ -138,42 +139,49 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     struct tm *tick_time = localtime(&temp);
 
     // Write the current hours and minutes into a buffer
-    char classic_time_hour[8];
-    char classic_time_minute[8];
-    strftime(classic_time_hour, sizeof(classic_time_hour), clock_is_24h_style() ?
-                                        "%H" : "%I", tick_time);
-    strftime(classic_time_minute, sizeof(classic_time_minute), "%M", tick_time);
+    char time[5];
+    strftime(time, sizeof(time), clock_is_24h_style() ?
+                                        "%H%M" : "%I%M", tick_time);
 
-    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "time_hour: %s", classic_time_hour);
-    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "time_minute: %s", classic_time_minute);
+    //TODO: so we need to figure out a nice clean loopable way to
+    // - make that gpoint make sense in a non-square rectangle (uneven scale factors?)
+    // oh, and make that work with the HH-MM setup on round displays, too. can't forget that
+    // this feels fizzbuzzy. like there should definitely be a mathematical solution to this.
+    // getting a real boss baby vibe from this math problem.
 
-    #if defined(PBL_RECT)
-    static char ch1[2];
-    static char ch2[2];
-    static char cm1[2];
-    static char cm2[2];
+    for (uint8_t i = 0; i < 4; i++) {
+        // split off the char for the digit i need
+        static char buf[2];
+        strncpy(buf, time+i, 1);
 
-    strncpy(ch1, classic_time_hour+0, 1);
-    strncpy(ch2, classic_time_hour+1, 1);
-    strncpy(cm1, classic_time_minute+0, 1);
-    strncpy(cm2, classic_time_minute+1, 1);
+        GPoint point = POINT_CLASSIC_TIME_TOP_LEFT;
+        GPoint origin = GPoint(50, 50);
 
-    graphics_draw_text(ctx, ch1, classic_font_time, BOUND_CLASSIC_TIME_H1, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour1
-    graphics_draw_text(ctx, ch2, classic_font_time, BOUND_CLASSIC_TIME_H2, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour2
-    graphics_draw_text(ctx, cm1, classic_font_time, BOUND_CLASSIC_TIME_M1, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute1
-    graphics_draw_text(ctx, cm2, classic_font_time, BOUND_CLASSIC_TIME_M2, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute2
+        // Translate coordinate plane
+        point = GPoint(point.x - origin.x, point.y - origin.y);
 
+        bool inv_x = i & 0b00000001; //i can get this value from the rightmost bit of int i
+        bool inv_y = i & 0b00000010; // i can get this value from the second-to-rightmost bit of int i
 
-    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "h1: %s", ch1);
-    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "h2: %s", ch2);
-    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "m1: %s", cm1);
-    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "m2: %s", cm2);
-    #endif
+        point = GPoint(
+            point.x * (inv_x ? -1 : 1),  // invert, or do not invert, coordinate
+            point.y * (inv_y ? -1 : 1)
+        );
 
-    #if defined(PBL_ROUND)
-    graphics_draw_text(ctx, classic_time_hour, classic_font_time, BOUND_CLASSIC_TIME_HOUR, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour
-    graphics_draw_text(ctx, classic_time_minute, classic_font_time, BOUND_CLASSIC_TIME_MINUTE, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute
-    #endif
+        // Translate coordinate plane back
+        point = GPoint(point.x + origin.x, point.y + origin.y);
+
+        // Scale from 100x100 coordinate to displaysplace coordinate
+        point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
+        text_draw_centered(ctx, buf, classic_font_time, point);
+    }
+
+    // #endif
+
+    // #if defined(PBL_ROUND)
+    // graphics_draw_text(ctx, classic_time_hour, classic_font_time, BOUND_CLASSIC_TIME_HOUR, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour
+    // graphics_draw_text(ctx, classic_time_minute, classic_font_time, BOUND_CLASSIC_TIME_MINUTE, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute
+    // #endif
     }
 
     //Jewel
