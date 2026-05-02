@@ -4,10 +4,10 @@ typedef struct {
     float scale_factor;
 } ScalePointCBContext;
 
-GPoint scale_gpoint(GPoint point, float scale_factor) {
+GPoint scale_gpoint(GPoint point, float scale_x, float scale_y) {
     GPoint scaled_point = GPoint(
-        point.x *= scale_factor,
-        point.y *= scale_factor
+        point.x *= scale_x,
+        point.y *= scale_y
     );
     return scaled_point;
 }
@@ -16,7 +16,7 @@ static bool prv_gdraw_command_scale_points(GDrawCommand *command, uint32_t index
   ScalePointCBContext *scale_ctx = context;
   // Move points
   for (int i = 0; i < gdraw_command_get_num_points(command); i++) {
-    gdraw_command_set_point(command, i, scale_gpoint(gdraw_command_get_point(command, i), scale_ctx->scale_factor));
+    gdraw_command_set_point(command, i, scale_gpoint(gdraw_command_get_point(command, i), scale_ctx->scale_factor, scale_ctx->scale_factor));
   }
 
   //Scale stroke width
