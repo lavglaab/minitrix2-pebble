@@ -140,8 +140,13 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
 
     // Write the current hours and minutes into a buffer
     char time[5];
-    strftime(time, sizeof(time), clock_is_24h_style() ?
+
+    #if defined (DEBUG_UI_DUMMYMODE)
+        strncpy(time, "1234", 5); // debug time
+    #else
+        strftime(time, sizeof(time), clock_is_24h_style() ?
                                         "%H%M" : "%I%M", tick_time);
+    #endif
 
     //TODO: so we need to figure out a nice clean loopable way to
     // - make that gpoint make sense in a non-square rectangle (uneven scale factors?)
@@ -189,6 +194,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     gdraw_command_image_draw(ctx, s_pdc_classic_jewel, s_image_origin);
 
     //Jewel stroke
+    draw_command_image_recolor(s_pdc_classic_jewel_stroke, GColorBlack);
     gdraw_command_image_draw(ctx, s_pdc_classic_jewel_stroke, s_image_origin);
 }
 
