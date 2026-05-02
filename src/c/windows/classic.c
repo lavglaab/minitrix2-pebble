@@ -130,63 +130,52 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
 
     // Draw time
     if (!s_settings.HideUI || classic_time_showing) {
-    if (!classic_font_time) {
-      classic_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_BALOO_60));
-    }
-    graphics_context_set_text_color(ctx, PAL_CLASSIC_CLOCK);
-    // Get a tm structure
-    time_t temp = time(NULL);
-    struct tm *tick_time = localtime(&temp);
+        if (!classic_font_time) {
+            classic_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_BALOO_60));
+        }
+        graphics_context_set_text_color(ctx, PAL_CLASSIC_CLOCK);
+        // Get a tm structure
+        time_t temp = time(NULL);
+        struct tm *tick_time = localtime(&temp);
 
-    // Write the current hours and minutes into a buffer
-    char time[5];
-
-    #if defined (DEBUG_UI_DUMMYMODE)
+        // Write the current hours and minutes into a buffer
+        char time[5];
+        #if defined (DEBUG_UI_DUMMYMODE)
         strncpy(time, "1234", 5); // debug time
-    #else
-        strftime(time, sizeof(time), clock_is_24h_style() ?
-                                        "%H%M" : "%I%M", tick_time);
-    #endif
+        #else
+        strftime(time, sizeof(time), clock_is_24h_style() ? "%H%M" : "%I%M", tick_time); // real time
+        #endif
 
-    //TODO: so we need to figure out a nice clean loopable way to
-    // - make that gpoint make sense in a non-square rectangle (uneven scale factors?)
-    // oh, and make that work with the HH-MM setup on round displays, too. can't forget that
-    // this feels fizzbuzzy. like there should definitely be a mathematical solution to this.
-    // getting a real boss baby vibe from this math problem.
+        // Values to adjust layout between round and rect
+        const int digit_places = PBL_IF_ROUND_ELSE(2, 4);
+        const int digits_per_place = PBL_IF_ROUND_ELSE(2, 1);
 
-    for (uint8_t i = 0; i < 4; i++) {
-        // split off the char for the digit i need
-        static char buf[2];
-        strncpy(buf, time+i, 1);
+        for (uint8_t i = 0; i < digit_places; i++) {
+            // split off the char for the digit i need
+            static char buf[3];
+            strncpy(buf, time + (i * digits_per_place), digits_per_place);
 
-        GPoint point = POINT_CLASSIC_TIME_TOP_LEFT;
-        GPoint origin = GPoint(50, 50);
+            GPoint point = PBL_IF_ROUND_ELSE(POINT_CLASSIC_TIME_LEFT, POINT_CLASSIC_TIME_TOP_LEFT);
+            GPoint origin = GPoint(50, 50);
 
-        // Translate coordinate plane
-        point = GPoint(point.x - origin.x, point.y - origin.y);
+            // Translate coordinate plane
+            point = GPoint(point.x - origin.x, point.y - origin.y);
 
-        bool inv_x = i & 0b00000001; //i can get this value from the rightmost bit of int i
-        bool inv_y = i & 0b00000010; // i can get this value from the second-to-rightmost bit of int i
+            bool inv_x = i & 0b00000001; //i can get this value from the rightmost bit of int i
+            bool inv_y = i & 0b00000010; // i can get this value from the second-to-rightmost bit of int i
 
-        point = GPoint(
-            point.x * (inv_x ? -1 : 1),  // invert, or do not invert, coordinate
-            point.y * (inv_y ? -1 : 1)
-        );
+            point = GPoint(
+                point.x * (inv_x ? -1 : 1),  // invert, or do not invert, coordinate
+                point.y * (inv_y ? -1 : 1)
+            );
 
-        // Translate coordinate plane back
-        point = GPoint(point.x + origin.x, point.y + origin.y);
+            // Translate coordinate plane back
+            point = GPoint(point.x + origin.x, point.y + origin.y);
 
-        // Scale from 100x100 coordinate to displaysplace coordinate
-        point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
-        text_draw_centered(ctx, buf, classic_font_time, point);
-    }
-
-    // #endif
-
-    // #if defined(PBL_ROUND)
-    // graphics_draw_text(ctx, classic_time_hour, classic_font_time, BOUND_CLASSIC_TIME_HOUR, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour
-    // graphics_draw_text(ctx, classic_time_minute, classic_font_time, BOUND_CLASSIC_TIME_MINUTE, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute
-    // #endif
+            // Scale from 100x100 coordinate to displaysplace coordinate
+            point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
+            text_draw_centered(ctx, buf, classic_font_time, point);
+        }
     }
 
     //Jewel
