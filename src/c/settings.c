@@ -1,24 +1,110 @@
-#include <pebble.h>
 #include "settings.h"
+#include <pebble.h>
+#include "debug_flags.h"
 
 /* ---------- Settings ---------- */
-ClaySettings s_settings;
+static ClaySettings *s_settings;
 
-void default_settings() {
-  s_settings.DialMode = 'c';
-  s_settings.HideUI = false;
-  s_settings.DoColorOverride = false;
-  s_settings.CustomColor = GColorWhite;
-  s_settings.HighContrast = false;
-  s_settings.DoWeather = false;
-  s_settings.WeatherUnits = 'f';
+static ClaySettings s_default_settings = {
+    .DialMode = 'c',
+    .HideUI = false,
+    .DoColorOverride = false,
+    .CustomColor = GColorWhite,
+    .HighContrast = false,
+    .DoWeather = false,
+    .WeatherUnits = 'f'
+    // .SettingsVersion = -1
+};
+
+static void prv_settings_migrate() {
+    // minitrix2 originally did not version its saved settings, so if we have settings with no version, assume it was the original defaults
+    // between version 0.2 and whatever comes after, i plan to add a new setting for text flow direction on the rect classic dial. The default behavior will be different than the previous default behavior, so i want to apply the old behavior to existing user prefs, and the new behavior to new prefs
 }
 
-void load_settings() {
-  default_settings();
-  persist_read_data(SETTINGS_KEY, &s_settings, sizeof(s_settings));
+static void prv_settings_save() {
+    // LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "persist write settings");
+    persist_write_data(SETTINGS_KEY, s_settings, sizeof(s_settings));
 }
 
-void save_settings() {
-  persist_write_data(SETTINGS_KEY, &s_settings, sizeof(s_settings));
+static void prv_settings_init() {
+    if (s_settings == NULL) {
+        // Allocate memory for our settings struct
+        s_settings = malloc(sizeof(ClaySettings));
+        LOG_IF_ENABLED(DEBUG_LOG_MEMORY, APP_LOG_LEVEL_INFO, "malloc s_settings");
+    }
+
+    // Prefill with default settings
+    *s_settings = s_default_settings;
+    // Apply saved prefs over defaults
+    persist_read_data(SETTINGS_KEY, s_settings, sizeof(s_settings));
+}
+
+ClaySettings * settings_get() {
+    // LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "settings_get()");
+    if (s_settings == NULL) {
+        // allocate memory and create the pointer
+        prv_settings_init();
+    }
+    // LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "return s_settings");
+    return s_settings;
+}
+
+void settings_deinit() {
+    if (s_settings == NULL) { return; }
+    // TODO: deallocate memory
+    free(s_settings);
+    s_settings = NULL;
+    LOG_IF_ENABLED(DEBUG_LOG_MEMORY, APP_LOG_LEVEL_INFO, "free s_settings");
+}
+
+int settings_process_appmessage(DictionaryIterator *iter, void *context) { // Call this from our AppMessage received handler
+    int statuscode = 0; // 0 == no settings received in this appmessage
+                        // 1 == yes, this appmessage contains settings, and we've processed them
+                        // -1 == some kind of error
+
+    Tuple *dial_mode_t = dict_find(iter, MESSAGE_KEY_PrefDialMode);
+    if(dial_mode_t) {
+      settings_get()->DialMode = dial_mode_t->value->int8;
+      statuscode = 1;
+    }
+
+    Tuple *hide_ui_t = dict_find(iter, MESSAGE_KEY_PrefHideUI);
+    if(hide_ui_t) {
+        settings_get()->HideUI = hide_ui_t->value->int32 == 1;
+        statuscode = 1;
+    }
+
+    Tuple *high_contrast_t = dict_find(iter, MESSAGE_KEY_PrefHighContrast);
+    if(high_contrast_t) {
+        settings_get()->HighContrast = high_contrast_t->value->int32 == 1;
+        statuscode = 1;
+    }
+
+    Tuple *do_color_override_t = dict_find(iter, MESSAGE_KEY_PrefDoColorOverride);
+    if(do_color_override_t) {
+        settings_get()->DoColorOverride = do_color_override_t->value->int32 == 1;
+        statuscode = 1;
+    }
+
+    Tuple *custom_color_t = dict_find(iter, MESSAGE_KEY_PrefOverrideColor);
+    if(custom_color_t) {
+        settings_get()->CustomColor = GColorFromHEX(custom_color_t->value->int32);
+        statuscode = 1;
+    }
+
+    //Features
+    Tuple *do_weather_t = dict_find(iter, MESSAGE_KEY_PrefDoWeather);
+    if(do_weather_t) {
+        settings_get()->DoWeather = do_weather_t->value->int32 == 1;
+        statuscode = 1;
+    }
+
+    Tuple *weather_units_t = dict_find(iter, MESSAGE_KEY_PrefWeatherUnits);
+    if(weather_units_t) {
+      settings_get()->WeatherUnits = weather_units_t->value->int8;
+      statuscode = 1;
+    }
+
+    prv_settings_save();
+    return statuscode;
 }

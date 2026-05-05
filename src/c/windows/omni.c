@@ -28,7 +28,7 @@ static bool omni_time_showing = false;
 static GColor prv_omni_color() {
   GColor color = PAL_OMNI_STRIPES;
   #if defined(PBL_COLOR)
-  if (s_settings.DoColorOverride) { color = s_settings.CustomColor; }
+  if (settings_get()->DoColorOverride) { color = settings_get()->CustomColor; }
   #endif
   return color;
 }
@@ -36,12 +36,12 @@ static GColor prv_omni_color() {
 static GColor prv_omni_color_data() {
   GColor color = PAL_OMNI_DATA;
   #if defined(PBL_COLOR)
-  if (s_settings.HighContrast) {
+  if (settings_get()->HighContrast) {
     color = gcolor_legible_over(prv_omni_color());
     return color;
   }
 
-  if (s_settings.DoColorOverride) { color = gcolor_legible_over(s_settings.CustomColor); }
+  if (settings_get()->DoColorOverride) { color = gcolor_legible_over(settings_get()->CustomColor); }
   #endif
   return color;
 }
@@ -86,7 +86,7 @@ void omni_update_style() {
 void omni_ui_set_hidden(bool value) {
   omni_time_showing = !value;
   layer_set_hidden(text_layer_get_layer(s_layer_date), value);
-  if (s_settings.DoWeather) { layer_set_hidden(text_layer_get_layer(s_layer_weather), value); }
+  if (settings_get()->DoWeather) { layer_set_hidden(text_layer_get_layer(s_layer_weather), value); }
   layer_mark_dirty(s_layer_background);
 }
 
@@ -132,7 +132,7 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     gdraw_command_image_draw(ctx, s_pdc_omni_carets, s_image_origin);
 
     // Draw time
-    if (!s_settings.HideUI || omni_time_showing) {
+    if (!settings_get()->HideUI || omni_time_showing) {
     if (!omni_font_time) {
       omni_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ALATSI_56));
     }
@@ -189,7 +189,7 @@ void omni_window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(s_layer_date));
   omni_update_date();
 
-  if (s_settings.DoWeather) {
+  if (settings_get()->DoWeather) {
     //Weather layer
     s_layer_weather = text_layer_create(BOUND_OMNI_WEATHER);
     text_layer_set_background_color(s_layer_weather, GColorClear);
@@ -200,7 +200,7 @@ void omni_window_load(Window *window) {
   }
 
   omni_update_style();
-  omni_ui_set_hidden(s_settings.HideUI);
+  omni_ui_set_hidden(settings_get()->HideUI);
 }
 
 void omni_window_unload(Window *window) {

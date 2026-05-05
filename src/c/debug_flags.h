@@ -7,6 +7,7 @@
 
 #define DEBUG_LOG_TIMESTRINGS false // Print time strings and substrings
 #define DEBUG_LOG_LIFECYCLE false // Life cycle events like window creation and function calls
+#define DEBUG_LOG_MEMORY true // heap allocation and freeing
 #define DEBUG_LOG_WEATHER true // Communication, processing, and storage relating to weather
 
 // #define DEBUG_UI_DUMMYMODE // Replace time and data display for store screenshots

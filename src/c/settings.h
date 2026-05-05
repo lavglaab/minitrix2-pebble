@@ -13,12 +13,10 @@ typedef struct ClaySettings{
 
     bool DoWeather;
     char WeatherUnits;
+
+    // int SettingsVersion;
 } __attribute__((__packed__)) ClaySettings;
 
-ClaySettings s_settings;
-
-void default_settings();
-
-void load_settings();
-
-void save_settings();
+ClaySettings * settings_get();
+void settings_deinit();
+int settings_process_appmessage(DictionaryIterator *iter, void *context);

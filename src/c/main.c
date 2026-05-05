@@ -7,7 +7,7 @@
 #include "debug_flags.h"
 
 // Convenience macro for doing stuff based on dial mode
-#define UI_IF_OMNI_ELSE(a, b) (s_settings.DialMode == 'o') ? (a) : (b)
+#define UI_IF_OMNI_ELSE(a, b) (settings_get()->DialMode == 'o') ? (a) : (b)
 
 static Window *s_window_classic;
 static Window *s_window_omni;
@@ -22,43 +22,15 @@ static void common_update_weather(int response_code); // defined under UI Common
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
   /* ---- Comms state ---- */
   Tuple *js_ready_t = dict_find(iter, MESSAGE_KEY_JSReady);
-  if(js_ready_t && s_settings.DoWeather) {
+  if(js_ready_t && settings_get()->DoWeather) {
     s_js_ready = true;
     LOG_IF_ENABLED(DEBUG_LOG_WEATHER, APP_LOG_LEVEL_INFO, "JS is ready! Asking for weather");
     request_new_weather();
   }
 
   /* ---- Settings ---- */
-  // UI
-  Tuple *dial_mode_t = dict_find(iter, MESSAGE_KEY_PrefDialMode);
-  if(dial_mode_t) {
-    s_settings.DialMode = dial_mode_t->value->int8;
-  }
-
-  Tuple *hide_ui_t = dict_find(iter, MESSAGE_KEY_PrefHideUI);
-  if(hide_ui_t) { s_settings.HideUI = hide_ui_t->value->int32 == 1; }
-
-  Tuple *high_contrast_t = dict_find(iter, MESSAGE_KEY_PrefHighContrast);
-  if(high_contrast_t) { s_settings.HighContrast = high_contrast_t->value->int32 == 1; }
-
-  Tuple *do_color_override_t = dict_find(iter, MESSAGE_KEY_PrefDoColorOverride);
-  if(do_color_override_t) { s_settings.DoColorOverride = do_color_override_t->value->int32 == 1; }
-
-  Tuple *custom_color_t = dict_find(iter, MESSAGE_KEY_PrefOverrideColor);
-  if(custom_color_t) { s_settings.CustomColor = GColorFromHEX(custom_color_t->value->int32); }
-
-  //Features
-  Tuple *do_weather_t = dict_find(iter, MESSAGE_KEY_PrefDoWeather);
-  if(do_weather_t) { s_settings.DoWeather = do_weather_t->value->int32 == 1; }
-
-  Tuple *weather_units_t = dict_find(iter, MESSAGE_KEY_PrefWeatherUnits);
-  if(weather_units_t) {
-    s_settings.WeatherUnits = weather_units_t->value->int8;
-  }
-
-  save_settings();
-
-  if(dial_mode_t || hide_ui_t || do_color_override_t || custom_color_t || do_weather_t) {
+  int message_contains_settings = settings_process_appmessage(iter, context);
+  if(message_contains_settings != 0) {
     push_proper_dial_window();
   }
 
@@ -125,7 +97,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits changed) {
   LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "Tick handler fired");
   if ((changed & MINUTE_UNIT) != 0) { common_update_minute(); }
   if ((changed & DAY_UNIT) != 0) { common_update_date(); }
-  if ((changed & HOUR_UNIT) != 0 && s_settings.DoWeather && !has_saved_weather()) { request_new_weather(); }
+  if ((changed & HOUR_UNIT) != 0 && settings_get()->DoWeather && !has_saved_weather()) { request_new_weather(); }
 }
 
 static void battery_callback(BatteryChargeState state) { common_update_style(); }
@@ -139,7 +111,7 @@ static void bluetooth_callback(bool connected) {
 }
 
 static void tap_timer_handler(void *data) {
-  if (s_settings.HideUI) {
+  if (settings_get()->HideUI) {
     common_ui_set_hidden(true);
     s_tap_timer = NULL;
   }
@@ -189,8 +161,6 @@ static void prv_push_window_omni() {
 }
 
 static void prv_window_load_common() {
-  load_settings();
-
   // Clear any existing event handlers
   tick_timer_service_unsubscribe();
   battery_state_service_unsubscribe();
@@ -203,7 +173,7 @@ static void prv_window_load_common() {
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = bluetooth_callback
   });
-  if (s_settings.HideUI) { accel_tap_service_subscribe(accel_tap_handler); }
+  if (settings_get()->HideUI) { accel_tap_service_subscribe(accel_tap_handler); }
 }
 
 static void push_proper_dial_window() {
@@ -229,6 +199,8 @@ static void prv_deinit(void) {
   battery_state_service_unsubscribe();
   connection_service_unsubscribe();
   accel_tap_service_unsubscribe();
+
+  settings_deinit();
 }
 
 int main(void) {

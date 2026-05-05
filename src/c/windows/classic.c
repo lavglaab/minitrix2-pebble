@@ -28,7 +28,7 @@ static bool classic_time_showing = false;
 static GColor prv_classic_jewel_color() {
   GColor color = PAL_CLASSIC_JEWEL;
   #if defined(PBL_COLOR)
-  if (s_settings.DoColorOverride) { color = s_settings.CustomColor; }
+  if (settings_get()->DoColorOverride) { color = settings_get()->CustomColor; }
   if (battery_state_service_peek().charge_percent <= 10) { color = PAL_CLASSIC_STATUS_LOWBATT; }
   if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_STATUS_DISCONNECT; }
   #endif
@@ -39,12 +39,12 @@ static GColor prv_classic_complication_color() {
   GColor color = PAL_CLASSIC_COMPLICATIONS;
   #if defined(PBL_COLOR)
 
-  if (s_settings.HighContrast) {
+  if (settings_get()->HighContrast) {
     color = gcolor_legible_over(prv_classic_jewel_color());
     return color;
   }
 
-  if (s_settings.DoColorOverride ) { color = gcolor_legible_over(s_settings.CustomColor); }
+  if (settings_get()->DoColorOverride ) { color = gcolor_legible_over(settings_get()->CustomColor); }
   if (battery_state_service_peek().charge_percent <= 10) { color = PAL_CLASSIC_TEXT_LOWBATT; }
   if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_TEXT_DISCONNECT; }
   #endif
@@ -52,7 +52,7 @@ static GColor prv_classic_complication_color() {
 }
 
 static GColor prv_classic_background_color() {
-    return (s_settings.DialMode == 'c') ? PAL_CLASSIC_GREY_CARETS : PAL_CLASSIC_BLACK_CARETS;
+    return (settings_get()->DialMode == 'c') ? PAL_CLASSIC_GREY_CARETS : PAL_CLASSIC_BLACK_CARETS;
 }
 
 void classic_update_minute() {
@@ -87,7 +87,7 @@ void classic_update_style() {
 void classic_ui_set_hidden(bool value) {
   classic_time_showing = !value;
   layer_set_hidden(text_layer_get_layer(s_layer_date), value);
-  if (s_settings.DoWeather) { layer_set_hidden(text_layer_get_layer(s_layer_weather), value); }
+  if (settings_get()->DoWeather) { layer_set_hidden(text_layer_get_layer(s_layer_weather), value); }
   layer_mark_dirty(s_layer_background);
 }
 
@@ -129,7 +129,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     gdraw_command_image_draw(ctx, s_pdc_classic_carets, s_image_origin);
 
     // Draw time
-    if (!s_settings.HideUI || classic_time_showing) {
+    if (!settings_get()->HideUI || classic_time_showing) {
         if (!classic_font_time) {
             classic_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_BALOO_60));
         }
@@ -207,7 +207,7 @@ void classic_window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(s_layer_date));
   classic_update_date();
 
-  if (s_settings.DoWeather) {
+  if (settings_get()->DoWeather) {
     //Weather layer
     s_layer_weather = text_layer_create(BOUND_CLASSIC_WEATHER);
     // text_layer_set_text_color(s_layer_weather, prv_classic_complication_color());
@@ -216,10 +216,10 @@ void classic_window_load(Window *window) {
     text_layer_set_font(s_layer_weather, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
     text_layer_set_text(s_layer_weather, "Weather!");
     layer_add_child(window_layer, text_layer_get_layer(s_layer_weather));
-  }
+    }
 
   classic_update_style();
-  classic_ui_set_hidden(s_settings.HideUI);
+  classic_ui_set_hidden(settings_get()->HideUI);
 }
 
 void classic_window_unload(Window *window) {
