@@ -19,6 +19,21 @@ static ClaySettings s_default_settings = {
 static void prv_settings_migrate() {
     // minitrix2 originally did not version its saved settings, so if we have settings with no version, assume it was the original defaults
     // between version 0.2 and whatever comes after, i plan to add a new setting for text flow direction on the rect classic dial. The default behavior will be different than the previous default behavior, so i want to apply the old behavior to existing user prefs, and the new behavior to new prefs
+
+    // so i think what we want to actually do is
+    // - check if persist exists. if not, this is first run. if so, continue with migration
+    // - check if persist contains a value for SettignsVersion. if not, we are 0.2->0.3
+    // - if we are 0.2->0.3, set a value for classic-time-direction, and set settingsVersion = 1
+    if (!persist_exists(VERSION_KEY) && !persist_exists(SETTINGS_KEY)) {
+        // no persist exists, this is first run (or user is updated from 0.2 without ever touching settings)
+        persist_write_int(VERSION_KEY, SETTINGS_VERSION_CURRENT);
+        return;
+    }
+    if (!persist_exists(VERSION_KEY) && persist_exists(SETTINGS_KEY)) {
+        // we have settings, but no version, which means we are coming from 0.2 settings
+        persist_write_int(VERSION_KEY, 1);
+        // TODO: set classic text flow direction pref to top->bottom
+    }
 }
 
 static void prv_settings_save() {
@@ -37,6 +52,8 @@ static void prv_settings_init() {
     *s_settings = s_default_settings;
     // Apply saved prefs over defaults
     persist_read_data(SETTINGS_KEY, s_settings, sizeof(s_settings));
+    // apply any necessary format changes across watchapp updates
+    prv_settings_migrate();
 }
 
 ClaySettings * settings_get() {
