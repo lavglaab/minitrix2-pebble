@@ -11,7 +11,8 @@ static Layer *s_layer_background;
 static TextLayer *s_layer_date;
 static TextLayer *s_layer_weather;
 
-static GFont classic_font_time;
+static GFont s_font_time_medium;
+static GFont s_font_time_large;
 
 static GPoint s_image_origin = GPoint(0,0);
 
@@ -98,6 +99,32 @@ static void prv_init_pdc_images() {
 }
 
 /* ---------- Update procs ---------- */
+static void prv_init_fonts() {
+    if (s_font_time_large == NULL) {
+        s_font_time_large = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_BALOO_77));
+    }
+    if (s_font_time_medium == NULL) {
+        s_font_time_medium = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_BALOO_60));
+    }
+}
+
+static GFont prv_select_font_for_size(Layer *layer) {
+    int height = layer_get_bounds(layer).size.h;
+    if (height > 180) {
+        // unobstructedbounds is tall enough to use the larger font
+        if (s_font_time_large == NULL) {
+            prv_init_fonts();
+        }
+        return s_font_time_large;
+    } else {
+        // use the regular basalt-sized font
+        if (s_font_time_medium == NULL) {
+            prv_init_fonts();
+        }
+        return s_font_time_medium;
+    }
+}
+
 static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "update_proc_classic_bg");
     GRect bounds = layer_get_unobstructed_bounds(layer);
@@ -130,9 +157,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
 
     // Draw time
     if (!settings_get()->HideUI || classic_time_showing) {
-        if (!classic_font_time) {
-            classic_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_BALOO_60));
-        }
+        GFont time_font = prv_select_font_for_size(layer);
         graphics_context_set_text_color(ctx, PAL_CLASSIC_CLOCK);
         // Get a tm structure
         time_t temp = time(NULL);
@@ -174,7 +199,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
 
             // Scale from 100x100 coordinate to displaysplace coordinate
             point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
-            text_draw_centered(ctx, buf, classic_font_time, point);
+            text_draw_centered(ctx, buf, time_font, point);
         }
     }
 
@@ -237,7 +262,8 @@ void classic_window_unload(Window *window) {
   text_layer_destroy(s_layer_date);
   text_layer_destroy(s_layer_weather);
 
-  if (classic_font_time) { fonts_unload_custom_font(classic_font_time); }
+  if (s_font_time_medium) { fonts_unload_custom_font(s_font_time_medium); }
+  if (s_font_time_large) { fonts_unload_custom_font(s_font_time_large); }
 
 
   gdraw_command_image_destroy(s_pdc_classic_carets);

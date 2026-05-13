@@ -61,6 +61,12 @@
         },
         {
           "type": "font",
+          "name": "BALOO_77",
+          "file": "Baloo2-Bold.ttf",
+          "characterRegex": "[0-9]"
+        },
+        {
+          "type": "font",
           "name": "ALATSI_56",
           "file": "Alatsi-Regular.ttf",
           "characterRegex": "[0-9]"
