@@ -189,6 +189,15 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
             bool inv_x = i & 0b00000001; //i can get this value from the rightmost bit of int i
             bool inv_y = i & 0b00000010; // i can get this value from the second-to-rightmost bit of int i
 
+            #if defined(PBL_RECT)
+            if (settings_get()->RectClassicClockLtR) {
+                // swap which axes get inverted, thereby drawing left->right instead of top->bottom
+                bool temp = inv_x;
+                inv_x = inv_y;
+                inv_y = temp; // fun little shell game
+            }
+            #endif
+
             point = GPoint(
                 point.x * (inv_x ? -1 : 1),  // invert, or do not invert, coordinate
                 point.y * (inv_y ? -1 : 1)

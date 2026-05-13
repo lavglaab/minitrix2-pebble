@@ -12,11 +12,19 @@ static ClaySettings s_default_settings = {
     .CustomColor = GColorWhite,
     .HighContrast = false,
     .DoWeather = false,
-    .WeatherUnits = 'f'
-    // .SettingsVersion = -1
+    .WeatherUnits = 'f',
+    .RectClassicClockLtR = true
 };
 
-static void prv_settings_migrate() {
+static void prv_settings_save() {
+    // APP_LOG(APP_LOG_LEVEL_INFO, "persist write settings");
+    persist_write_data(SETTINGS_KEY, s_settings, sizeof(ClaySettings));
+}
+
+static int prv_settings_migrate() {
+    int statuscode = 0; // 0 == no need to migrate settings
+                        // 1 == OK, did a settings migration
+
     // minitrix2 originally did not version its saved settings, so if we have settings with no version, assume it was the original defaults
     // between version 0.2 and whatever comes after, i plan to add a new setting for text flow direction on the rect classic dial. The default behavior will be different than the previous default behavior, so i want to apply the old behavior to existing user prefs, and the new behavior to new prefs
 
@@ -27,18 +35,22 @@ static void prv_settings_migrate() {
     if (!persist_exists(VERSION_KEY) && !persist_exists(SETTINGS_KEY)) {
         // no persist exists, this is first run (or user is updated from 0.2 without ever touching settings)
         persist_write_int(VERSION_KEY, SETTINGS_VERSION_CURRENT);
-        return;
+        return statuscode;
     }
     if (!persist_exists(VERSION_KEY) && persist_exists(SETTINGS_KEY)) {
         // we have settings, but no version, which means we are coming from 0.2 settings
+        statuscode = 1;
         persist_write_int(VERSION_KEY, 1);
         // TODO: set classic text flow direction pref to top->bottom
+        settings_get()->RectClassicClockLtR = false;
+        APP_LOG(APP_LOG_LEVEL_INFO, "Did settings migration: RectClassicClockLtR = false");
     }
-}
 
-static void prv_settings_save() {
-    // LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "persist write settings");
-    persist_write_data(SETTINGS_KEY, s_settings, sizeof(s_settings));
+    if (statuscode == 1) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "Did settings migration");
+        prv_settings_save();
+    }
+    return statuscode;
 }
 
 static void prv_settings_init() {
@@ -51,7 +63,7 @@ static void prv_settings_init() {
     // Prefill with default settings
     *s_settings = s_default_settings;
     // Apply saved prefs over defaults
-    persist_read_data(SETTINGS_KEY, s_settings, sizeof(s_settings));
+    persist_read_data(SETTINGS_KEY, s_settings, sizeof(ClaySettings));
     // apply any necessary format changes across watchapp updates
     prv_settings_migrate();
 }
@@ -91,6 +103,15 @@ int settings_process_appmessage(DictionaryIterator *iter, void *context) { // Ca
         statuscode = 1;
     }
 
+    Tuple *clock_dir_t = dict_find(iter, MESSAGE_KEY_PrefRectClassicClockLtR);
+    if(clock_dir_t) {
+        // APP_LOG(APP_LOG_LEVEL_DEBUG, "MESSAGE_KEY_PrefRectClassicClockLtR: %d", clock_dir_t->value->int8);
+        settings_get()->RectClassicClockLtR = ((char)clock_dir_t->value->int8) == 't'; // this pref is passed as a char because i wanted a radiogroup in clay
+        // APP_LOG(APP_LOG_LEVEL_DEBUG, "settings_get()->RectClassicClockLtR: %d", settings_get()->RectClassicClockLtR);
+        // APP_LOG(APP_LOG_LEVEL_DEBUG, "clock_dir_t->value->int8 == 116: %d", (clock_dir_t->value->int8 == 116 /*'t'*/));
+        statuscode = 1;
+    }
+
     Tuple *high_contrast_t = dict_find(iter, MESSAGE_KEY_PrefHighContrast);
     if(high_contrast_t) {
         settings_get()->HighContrast = high_contrast_t->value->int32 == 1;
@@ -122,6 +143,6 @@ int settings_process_appmessage(DictionaryIterator *iter, void *context) { // Ca
       statuscode = 1;
     }
 
-    prv_settings_save();
+    if (statuscode == 1) { prv_settings_save(); }
     return statuscode;
 }

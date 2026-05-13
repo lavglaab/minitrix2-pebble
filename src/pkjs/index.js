@@ -27,7 +27,7 @@ Pebble.addEventListener('webviewclosed',
         // Grab OWM API token and save it to JS storage
         dict = clay.getSettings(e.response, false);
         if (dict.WeatherToken) {
-                console.log("Weathertoken: " + dict.WeatherToken.value);
+                console.log("Weathertoken saved!");
                 localStorage.setItem("WeatherToken", dict.WeatherToken.value);
         }
 
@@ -36,6 +36,9 @@ Pebble.addEventListener('webviewclosed',
                 console.log("PrefWeatherUnits: " + dict.PrefWeatherUnits.value);
                 localStorage.setItem("PrefWeatherUnits", dict.PrefWeatherUnits.value);
         }
+
+      //debug logging
+      // if (dict.PrefRectClassicClockLtR) { console.log("PrefRectClassicClockLtR: " + dict.PrefRectClassicClockLtR.value);  }
     }
 );
 
@@ -45,7 +48,7 @@ Pebble.addEventListener('ready',
   function(e) {
     console.log('PebbleKit JS ready!');
     if (localStorage.getItem("WeatherToken")) {
-        console.log('Stored OWM token: ' + localStorage.getItem("WeatherToken"));
+        console.log('OWM token present in localstorage');
     } else {
         console.log('No OWM token stored');
     }

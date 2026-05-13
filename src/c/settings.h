@@ -16,6 +16,8 @@ typedef struct ClaySettings{
 
     bool DoWeather;
     char WeatherUnits;
+
+    bool RectClassicClockLtR;
 } __attribute__((__packed__)) ClaySettings;
 
 ClaySettings * settings_get();
