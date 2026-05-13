@@ -35,6 +35,5 @@ void classic_window_unload(Window *window);
 #define POINT_CLASSIC_TIME_LEFT GPoint(18, 50)
 #endif
 
-#define BOUND_CLASSIC_DATE PBL_IF_RECT_ELSE(GRect(0,0,144,20), GRect(0,8,180,48))
 #define BOUND_CLASSIC_WEATHER PBL_IF_RECT_ELSE(GRect(0,144,144,20), GRect(0,116,180,48))
 #define BOUND_CLASSIC_WEATHER_ICON PBL_IF_RECT_ELSE(GRect(50,139,25,25), GRect(68,145,25,25))

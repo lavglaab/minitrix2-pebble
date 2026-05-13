@@ -63,7 +63,7 @@ void classic_update_date() {
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
   static char buffer_date[16];
-  strftime(buffer_date, sizeof(buffer_date), PBL_IF_RECT_ELSE("%a %b%e", "%a%n%b%e"), tick_time);
+  strftime(buffer_date, sizeof(buffer_date), PBL_IF_RECT_ELSE("%a %b %e", "%a%n%b %e"), tick_time);
   text_layer_set_text(s_layer_date, buffer_date);
 }
 
@@ -189,6 +189,22 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
 
 /* ---------- Life cycle ----------*/
 
+static void prv_date_layer_create(Window *window) {
+    GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(window));
+    GSize size_date = text_measure_simply("two lines\nof type", text_get_complication_font(), GRect(0, 0, bounds.size.w, 100));
+
+    GRect bounds_date = GRect(
+        0, PBL_IF_ROUND_ELSE(8, 0), bounds.size.w, size_date.h * 3
+    );
+    s_layer_date = text_layer_create(bounds_date);
+    text_layer_set_text_color(s_layer_date, prv_classic_complication_color());
+    text_layer_set_background_color(s_layer_date, GColorClear);
+    text_layer_set_text_alignment(s_layer_date, GTextAlignmentCenter);
+    text_layer_set_font(s_layer_date, text_get_complication_font());
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_layer_date));
+    classic_update_date();
+}
+
 void classic_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -199,13 +215,7 @@ void classic_window_load(Window *window) {
   layer_add_child(window_layer, s_layer_background);
 
   //Date layer
-  s_layer_date = text_layer_create(BOUND_CLASSIC_DATE);
-  // text_layer_set_text_color(s_layer_date, prv_classic_complication_color());
-  text_layer_set_background_color(s_layer_date, GColorClear);
-  text_layer_set_text_alignment(s_layer_date, GTextAlignmentCenter);
-  text_layer_set_font(s_layer_date, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-  layer_add_child(window_layer, text_layer_get_layer(s_layer_date));
-  classic_update_date();
+  prv_date_layer_create(window);
 
   if (settings_get()->DoWeather) {
     //Weather layer
