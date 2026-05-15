@@ -171,6 +171,16 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
         strftime(time, sizeof(time), clock_is_24h_style() ? "%H%M" : "%I%M", tick_time); // real time
         #endif
 
+        #if !defined(PBL_ROUND)
+        bool strip_leading_zero = !clock_is_24h_style();
+        if (strip_leading_zero) {
+            if ((char)time[0] == '0') {
+                time[0] = time[1];
+                time[1] = 'X';
+            }
+        }
+        #endif
+
         // Values to adjust layout between round and rect
         const int digit_places = PBL_IF_ROUND_ELSE(2, 4);
         const int digits_per_place = PBL_IF_ROUND_ELSE(2, 1);
@@ -179,6 +189,8 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
             // split off the char for the digit i need
             static char buf[3];
             strncpy(buf, time + (i * digits_per_place), digits_per_place);
+
+            if (strcmp(buf, "X") == 0) { continue; }
 
             GPoint point = PBL_IF_ROUND_ELSE(POINT_CLASSIC_TIME_LEFT, POINT_CLASSIC_TIME_TOP_LEFT);
             GPoint origin = GPoint(50, 50);
