@@ -73,6 +73,15 @@
           "characterRegex": "[0-9]"
         },
         {
+          "type": "font",
+          "name": "ALATSI_70",
+          "file": "Alatsi-Regular.ttf",
+          "characterRegex": "[0-9]",
+          "targetPlatforms": [
+            "emery", "gabbro"
+          ]
+        },
+        {
           "type": "raw",
           "name": "PATH_CLASSIC_CARETS",
           "file": "classic/classic-scl-carets.pdc"

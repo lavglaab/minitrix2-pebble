@@ -14,8 +14,6 @@ static TextLayer *s_layer_weather;
 static GFont s_font_time_medium;
 static GFont s_font_time_large;
 
-static GPoint s_image_origin = GPoint(0,0);
-
 static GDrawCommandImage *s_pdc_classic_carets;
 static GDrawCommandImage *s_pdc_classic_jewel;
 static GDrawCommandImage *s_pdc_classic_jewel_stroke;
@@ -145,7 +143,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
     if (delta_x != 0) { delta_x = (delta_x / 2) * -1; }
     if (delta_y != 0) { delta_y = (delta_y / 2) * -1; }
 
-    s_image_origin = GPoint(delta_x, delta_y);
+    GPoint image_origin = GPoint(delta_x, delta_y);
 
     //Clear canvas
     graphics_context_set_fill_color(ctx, classic_color_background);
@@ -153,7 +151,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
 
 
     //Black carets
-    gdraw_command_image_draw(ctx, s_pdc_classic_carets, s_image_origin);
+    gdraw_command_image_draw(ctx, s_pdc_classic_carets, image_origin);
 
     // Draw time
     if (!settings_get()->HideUI || classic_time_showing) {
@@ -226,11 +224,11 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
 
     //Jewel
     draw_command_image_recolor(s_pdc_classic_jewel, classic_color_jewel);
-    gdraw_command_image_draw(ctx, s_pdc_classic_jewel, s_image_origin);
+    gdraw_command_image_draw(ctx, s_pdc_classic_jewel, image_origin);
 
     //Jewel stroke
     draw_command_image_recolor(s_pdc_classic_jewel_stroke, GColorBlack);
-    gdraw_command_image_draw(ctx, s_pdc_classic_jewel_stroke, s_image_origin);
+    gdraw_command_image_draw(ctx, s_pdc_classic_jewel_stroke, image_origin);
 }
 
 /* ---------- Life cycle ----------*/

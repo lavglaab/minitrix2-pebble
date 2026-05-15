@@ -3,6 +3,7 @@
 #include "../settings.h"
 #include "../weather.h"
 #include "../debug_flags.h"
+#include "../text_drawing.h"
 #include "../pdc/colorize_pdc.h"
 #include "../pdc/scale_pdc.h"
 
@@ -10,9 +11,8 @@ static Layer *s_layer_background;
 static TextLayer *s_layer_date;
 static TextLayer *s_layer_weather;
 
-static GFont omni_font_time;
-
-static GPoint s_image_origin = GPoint(0,0);
+static GFont s_font_time_medium;
+static GFont s_font_time_large;
 
 static GDrawCommandImage *s_pdc_omni_jewel;
 static GDrawCommandImage *s_pdc_omni_carets;
@@ -97,6 +97,35 @@ static void prv_init_pdc_images() {
 }
 
 /* ---------- Update Procs ---------- */
+static void prv_init_fonts() {
+    #if defined(PBL_PLATFORM_GABBRO) || defined(PBL_PLATFORM_EMERY) // gross, ew, but i dont think theres a better way to pack an xl font
+    if (s_font_time_large == NULL) {
+        s_font_time_large = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ALATSI_70));
+    }
+    #endif
+    if (s_font_time_medium == NULL) {
+        s_font_time_medium = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ALATSI_56));
+    }
+}
+
+static GFont prv_select_font_for_size(Layer *layer) {
+    int height = layer_get_bounds(layer).size.h;
+    #if defined(PBL_PLATFORM_GABBRO) || defined(PBL_PLATFORM_EMERY) // gross, ew, but i dont think theres a better way to pack an xl font
+    if (height > 180) {
+        // unobstructedbounds is tall enough to use the larger font
+        if (s_font_time_large == NULL) {
+            prv_init_fonts();
+        }
+        return s_font_time_large;
+    }
+    #endif
+    // use the regular basalt-sized font
+    if (s_font_time_medium == NULL) {
+        prv_init_fonts();
+    }
+    return s_font_time_medium;
+}
+
 static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     LOG_IF_ENABLED(DEBUG_LOG_LIFECYCLE, APP_LOG_LEVEL_INFO, "update_proc_omni_bg");
     GRect bounds = layer_get_unobstructed_bounds(layer);
@@ -117,7 +146,7 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
     if (delta_x != 0) { delta_x = (delta_x / 2) * -1; }
     if (delta_y != 0) { delta_y = (delta_y / 2) * -1; }
 
-    s_image_origin = GPoint(delta_x, delta_y);
+    GPoint image_origin = GPoint(delta_x, delta_y);
 
     //Clear canvas
     graphics_context_set_fill_color(ctx, PAL_OMNI_BG);
@@ -125,50 +154,75 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
 
     //Status jewel
     draw_command_image_recolor(s_pdc_omni_jewel, omni_color_status);
-    gdraw_command_image_draw(ctx, s_pdc_omni_jewel, s_image_origin);
+    gdraw_command_image_draw(ctx, s_pdc_omni_jewel, image_origin);
 
     //Green carets
     draw_command_image_recolor(s_pdc_omni_carets, omni_color_main);
-    gdraw_command_image_draw(ctx, s_pdc_omni_carets, s_image_origin);
+    gdraw_command_image_draw(ctx, s_pdc_omni_carets, image_origin);
 
     // Draw time
     if (!settings_get()->HideUI || omni_time_showing) {
-    if (!omni_font_time) {
-      omni_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ALATSI_56));
-    }
-    graphics_context_set_text_color(ctx, omni_color_data);
-    // Get a tm structure
-    time_t temp = time(NULL);
-    struct tm *tick_time = localtime(&temp);
+        GFont time_font = prv_select_font_for_size(layer);
+        graphics_context_set_text_color(ctx, omni_color_data);
+        // Get a tm structure
+        time_t temp = time(NULL);
+        struct tm *tick_time = localtime(&temp);
 
-    // Write the current hours and minutes into a buffer
-    char omni_time_hour[8];
-    char omni_time_minute[8];
-    strftime(omni_time_hour, sizeof(omni_time_hour), clock_is_24h_style() ?
-                                        "%H" : "%I", tick_time);
-    strftime(omni_time_minute, sizeof(omni_time_minute), "%M", tick_time);
+        // Write the current hours and minutes into a buffer
+        char time[5];
+        #if defined (DEBUG_UI_DUMMYMODE)
+        strncpy(time, "1234", 5); // debug time
+        #else
+        strftime(time, sizeof(time), clock_is_24h_style() ? "%H%M" : "%I%M", tick_time); // real time
+        #endif
 
-    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "time_hour: %s", omni_time_hour);
-    LOG_IF_ENABLED(DEBUG_LOG_TIMESTRINGS, APP_LOG_LEVEL_DEBUG, "time_minute: %s", omni_time_minute);
+        bool strip_leading_zero = !clock_is_24h_style();
+        if (strip_leading_zero) {
+            if ((char)time[0] == '0') {
+                time[0] = time[1];
+                time[1] = 'X';
+            }
+        }
 
-    static char oh1[2];
-    static char oh2[2];
-    static char om1[2];
-    static char om2[2];
+        const int digit_places = 4;
+        const int digits_per_place = 1;
 
-    strncpy(oh1, omni_time_hour+0, 1);
-    strncpy(oh2, omni_time_hour+1, 1);
-    strncpy(om1, omni_time_minute+0, 1);
-    strncpy(om2, omni_time_minute+1, 1);
+        for (uint8_t i = 0; i < digit_places; i++) {
+            // split off the char for the digit i need
+            static char buf[2];
+            strncpy(buf, time + (i * digits_per_place), digits_per_place);
 
-    graphics_draw_text(ctx, oh1, omni_font_time, BOUND_OMNI_TIME_H1, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour1
-    graphics_draw_text(ctx, oh2, omni_font_time, BOUND_OMNI_TIME_H2, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Hour2
-    graphics_draw_text(ctx, om1, omni_font_time, BOUND_OMNI_TIME_M1, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute1
-    graphics_draw_text(ctx, om2, omni_font_time, BOUND_OMNI_TIME_M2, GTextOverflowModeWordWrap, GTextAlignmentCenter, 0); //Minute2
+            if (strcmp(buf, "X") == 0) { continue; }
+
+            GPoint point;
+            GPoint origin = GPoint(50, 50);
+            if (3 > i && i > 0) { // we have two points we use in the pattern A, B, B, A
+                point = POINT_OMNI_TIME_SECOND_LEFT;
+            } else {
+                point = POINT_OMNI_TIME_TOP_LEFT;
+            }
+
+            // Translate coordinate plane
+            point = GPoint(point.x - origin.x, point.y - origin.y);
+
+            bool flip = (i >= 2); // minute digits go on the bottom right
+
+            point = GPoint(
+                point.x * (flip ? -1 : 1),  // invert, or do not invert, coordinate
+                point.y * (flip ? -1 : 1)
+            );
+
+            // Translate coordinate plane back
+            point = GPoint(point.x + origin.x, point.y + origin.y);
+
+            // Scale from 100x100 coordinate to displaysplace coordinate
+            point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
+            text_draw_centered(ctx, buf, time_font, point);
+        }
     }
 
     //Caret stroke
-    gdraw_command_image_draw(ctx, s_pdc_omni_caret_stroke, s_image_origin);
+    gdraw_command_image_draw(ctx, s_pdc_omni_caret_stroke, image_origin);
 }
 
 /* ---------- Life cycle ----------*/
@@ -208,7 +262,8 @@ void omni_window_unload(Window *window) {
   text_layer_destroy(s_layer_date);
   text_layer_destroy(s_layer_weather);
 
-  if (omni_font_time) { fonts_unload_custom_font(omni_font_time); }
+  if (s_font_time_medium) { fonts_unload_custom_font(s_font_time_medium); }
+  if (s_font_time_large) { fonts_unload_custom_font(s_font_time_large); }
 
   gdraw_command_image_destroy(s_pdc_omni_jewel);
   gdraw_command_image_destroy(s_pdc_omni_carets);

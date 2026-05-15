@@ -7,7 +7,7 @@
 #include "debug_flags.h"
 
 // Convenience macro for doing stuff based on dial mode
-#define UI_IF_OMNI_ELSE(a, b) (settings_get()->DialMode == 'o') ? (a) : (b)
+#define UI_IF_OMNI_ELSE(a, b) (DEBUG_UI_ALWAYS_OV || settings_get()->DialMode == 'o') ? (a) : (b)
 
 static Window *s_window_classic;
 static Window *s_window_omni;
