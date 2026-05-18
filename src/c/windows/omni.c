@@ -217,7 +217,7 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
 
             // Scale from 100x100 coordinate to displaysplace coordinate
             point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
-            text_draw_centered(ctx, buf, time_font, point);
+            text_draw_centered(ctx, buf, time_font, point, TEXT_OFFSET_ALATSI);
         }
     }
 

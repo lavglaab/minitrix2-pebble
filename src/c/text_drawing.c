@@ -27,7 +27,7 @@ GSize text_measure_simply(const char * text, GFont const font, GRect box_max) {
 }
 
 // Draws text centered horizontally and vertically around the given point
-void text_draw_centered(GContext * ctx, const char * text, GFont const font, GPoint origin) {
+void text_draw_centered(GContext * ctx, const char * text, GFont const font, GPoint origin, int offset_factor) {
     #if defined(DEBUG_UI_TEXT_LOCATIONS)
     // Draw a target at our origin
     graphics_context_set_stroke_color(ctx, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
@@ -42,7 +42,7 @@ void text_draw_centered(GContext * ctx, const char * text, GFont const font, GPo
     // Create the bounds we will draw our text within
     GRect bounds_adjusted = GRect(
         origin.x - (size_measured.w / 2),
-        origin.y - (size_measured.h / 2) - (size_measured.h / 5), // text lines on pebble are taller than the actual type itself
+        origin.y - (size_measured.h / 2) - (size_measured.h / offset_factor), // text lines on pebble are taller than the actual type itself
         size_measured.w,
         size_measured.h
     );
