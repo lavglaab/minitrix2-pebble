@@ -10,7 +10,7 @@
 #define DEBUG_LOG_MEMORY false // heap allocation and freeing
 #define DEBUG_LOG_WEATHER false // Communication, processing, and storage relating to weather
 
-#define DEBUG_UI_ALWAYS_OV true // Always launch into omniverse dial, bypassing pref check
+#define DEBUG_UI_ALWAYS_OV false // Always launch into omniverse dial, bypassing pref check
 
 // #define DEBUG_UI_DUMMYMODE // Replace time and data display for store screenshots
 // #define DEBUG_UI_TEXT_LOCATIONS // Draw a target at the center point for each text block

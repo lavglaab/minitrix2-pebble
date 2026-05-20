@@ -251,7 +251,7 @@ static void prv_date_layer_resize() {
 
     // And actually apply the new bounds
     layer_set_frame(text_layer_get_layer(s_layer_date), frame_date);
-    // FUCK TEXTLAYERS
+    // FUCK TEXTLAYERS AND FUCK ME FOR THIS DESIGN
 }
 
 static void prv_date_layer_create(Window *window) {
@@ -269,6 +269,10 @@ static void prv_date_layer_create(Window *window) {
     omni_update_style(); // set text color
     omni_update_date(); // and set text content
     prv_date_layer_resize(); // apply real proper size
+}
+
+static void prv_unobstructed_change(AnimationProgress progress, void *context) {
+    prv_date_layer_resize(); // buh
 }
 
 void omni_window_load(Window *window) {
@@ -294,6 +298,11 @@ void omni_window_load(Window *window) {
 
   omni_update_style();
   omni_ui_set_hidden(settings_get()->HideUI);
+
+  UnobstructedAreaHandlers handlers = {
+      .change = prv_unobstructed_change
+    };
+    unobstructed_area_service_subscribe(handlers, NULL);
 }
 
 void omni_window_unload(Window *window) {
@@ -307,4 +316,6 @@ void omni_window_unload(Window *window) {
   gdraw_command_image_destroy(s_pdc_omni_jewel);
   gdraw_command_image_destroy(s_pdc_omni_carets);
   gdraw_command_image_destroy(s_pdc_omni_caret_stroke);
+
+  unobstructed_area_service_unsubscribe();
 }
