@@ -58,11 +58,11 @@ void omni_update_minute() {
 }
 
 void omni_update_date() {
-  time_t temp = time(NULL);
-  struct tm *tick_time = localtime(&temp);
-  static char buffer_date[16];
-  strftime(buffer_date, sizeof(buffer_date), "%a%n%b%e", tick_time);
-  text_layer_set_text(s_layer_date, buffer_date);
+    time_t temp = time(NULL);
+    struct tm *tick_time = localtime(&temp);
+    static char buffer_date[16];
+    strftime(buffer_date, sizeof(buffer_date), PBL_IF_ROUND_ELSE("%b %e%n%a", "%a%n%b %e"), tick_time);
+    text_layer_set_text(s_layer_date, buffer_date);
 }
 
 void omni_update_weather(int response_code) {
@@ -226,6 +226,50 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
 }
 
 /* ---------- Life cycle ----------*/
+static void prv_date_layer_resize() {
+    GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(layer_get_window(text_layer_get_layer(s_layer_date)))); // whew
+    GSize text_size = text_layer_get_content_size(s_layer_date);
+    GRect frame_date;
+    GPoint point = POINT_OMNI_TIME_TOP_LEFT;
+    GPoint origin = GPoint(50, 50);
+
+    // clamp size to actual text content
+    frame_date.size = GSize(text_size.w, text_size.h + 10);
+
+    // point bs
+    point = GPoint(point.x - origin.x, point.y - origin.y); // Translate coordinate plane
+    point = GPoint(point.x, -point.y); // invert y
+    point = GPoint(point.x + origin.x, point.y + origin.y); // Translate coordinate plane back
+    // Scale from 100x100 coordinate to displaysplace coordinate
+    point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
+
+    // Center textlayer frame around our calculated origin point
+    frame_date.origin = GPoint(
+        point.x - text_size.w / 2,
+        point.y - text_size.h / 2
+    );
+
+    // And actually apply the new bounds
+    layer_set_frame(text_layer_get_layer(s_layer_date), frame_date);
+    // FUCK TEXTLAYERS
+}
+
+static void prv_date_layer_create(Window *window) {
+    GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(window));
+
+    GRect bounds_date = GRect(
+        0, bounds.size.w / 2, bounds.size.w / 2, bounds.size.h / 2
+    );
+    s_layer_date = text_layer_create(bounds);
+    text_layer_set_background_color(s_layer_date, GColorClear);
+    text_layer_set_text_alignment(s_layer_date, PBL_IF_ROUND_ELSE(GTextAlignmentCenter, GTextAlignmentLeft));
+    text_layer_set_font(s_layer_date, text_get_complication_font());
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_layer_date));
+
+    omni_update_style(); // set text color
+    omni_update_date(); // and set text content
+    prv_date_layer_resize(); // apply real proper size
+}
 
 void omni_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
@@ -236,12 +280,7 @@ void omni_window_load(Window *window) {
   layer_add_child(window_layer, s_layer_background);
 
   //Date layer
-  s_layer_date = text_layer_create(BOUND_OMNI_DATE);
-  text_layer_set_background_color(s_layer_date, GColorClear);
-  text_layer_set_text_alignment(s_layer_date, GTextAlignmentLeft);
-  text_layer_set_font(s_layer_date, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-  layer_add_child(window_layer, text_layer_get_layer(s_layer_date));
-  omni_update_date();
+  prv_date_layer_create(window);
 
   if (settings_get()->DoWeather) {
     //Weather layer
