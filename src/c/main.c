@@ -250,8 +250,8 @@ static void prv_init(void) {
 }
 
 static void prv_deinit(void) {
-  window_destroy(s_window_classic);
-  window_destroy(s_window_omni);
+  if (s_window_classic != NULL) window_destroy(s_window_classic);
+  if (s_window_omni != NULL) window_destroy(s_window_omni);
 
   tick_timer_service_unsubscribe();
   battery_state_service_unsubscribe();

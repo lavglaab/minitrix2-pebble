@@ -100,9 +100,9 @@ void classic_ui_set_hidden(bool value) {
 }
 
 static void prv_init_pdc_images() {
-    if (!s_pdc_classic_carets) { s_pdc_classic_carets = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_CARETS); }
-    if (!s_pdc_classic_jewel) { s_pdc_classic_jewel = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_JEWEL); }
-    if (!s_pdc_classic_jewel_stroke) { s_pdc_classic_jewel_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_JEWEL_STROKE); }
+    if (s_pdc_classic_carets == NULL) { s_pdc_classic_carets = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_CARETS); }
+    if (s_pdc_classic_jewel == NULL) { s_pdc_classic_jewel = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_JEWEL); }
+    if (s_pdc_classic_jewel_stroke == NULL) { s_pdc_classic_jewel_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_CLASSIC_JEWEL_STROKE); }
 }
 
 /* ---------- Update procs ---------- */
@@ -297,4 +297,11 @@ void classic_window_unload(Window *window) {
   gdraw_command_image_destroy(s_pdc_classic_carets);
   gdraw_command_image_destroy(s_pdc_classic_jewel);
   gdraw_command_image_destroy(s_pdc_classic_jewel_stroke);
+
+  s_layer_background = NULL;
+  s_layer_date = NULL;
+  s_layer_weather = NULL;
+  s_pdc_classic_carets = NULL;
+  s_pdc_classic_jewel = NULL;
+  s_pdc_classic_jewel_stroke = NULL;
 }

@@ -104,9 +104,9 @@ void omni_ui_set_hidden(bool value) {
 }
 
 static void prv_init_pdc_images() {
-    if (!s_pdc_omni_jewel) { s_pdc_omni_jewel = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_JEWEL); }
-    if (!s_pdc_omni_carets) { s_pdc_omni_carets = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARETS); }
-    if (!s_pdc_omni_caret_stroke) { s_pdc_omni_caret_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARET_STROKE); }
+    if (s_pdc_omni_jewel == NULL) { s_pdc_omni_jewel = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_JEWEL); }
+    if (s_pdc_omni_carets == NULL) { s_pdc_omni_carets = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARETS); }
+    if (s_pdc_omni_caret_stroke == NULL) { s_pdc_omni_caret_stroke = gdraw_command_image_create_with_resource(RESOURCE_ID_PATH_OMNI_CARET_STROKE); }
 }
 
 /* ---------- Update Procs ---------- */
@@ -329,6 +329,15 @@ void omni_window_unload(Window *window) {
   gdraw_command_image_destroy(s_pdc_omni_jewel);
   gdraw_command_image_destroy(s_pdc_omni_carets);
   gdraw_command_image_destroy(s_pdc_omni_caret_stroke);
+
+  s_layer_background = NULL;
+  s_layer_date = NULL;
+  s_layer_weather = NULL;
+  s_font_time_medium = NULL;
+  s_font_time_large = NULL;
+  s_pdc_omni_jewel = NULL;
+  s_pdc_omni_carets = NULL;
+  s_pdc_omni_caret_stroke = NULL;
 
   unobstructed_area_service_unsubscribe();
 }
