@@ -81,6 +81,11 @@ void classic_update_style() {
 
     // Redraw everything
     layer_mark_dirty(s_layer_background);
+
+    // obelix only - color backliught
+    #if PBL_API_EXISTS(light_set_color)
+        light_set_color(classic_color_jewel);
+    #endif
 }
 
 void classic_ui_set_hidden(bool value) {

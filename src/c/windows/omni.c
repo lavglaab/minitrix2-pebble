@@ -81,6 +81,15 @@ void omni_update_style() {
 
     // Redraw everything
     layer_mark_dirty(s_layer_background);
+
+    // obelix only - color backliught
+    #if PBL_API_EXISTS(light_set_color)
+        if (!gcolor_equal(omni_color_status, GColorBlack)) {
+            light_set_color(omni_color_status);
+        } else {
+            light_set_color(omni_color_main);
+        }
+    #endif
 }
 
 void omni_ui_set_hidden(bool value) {
