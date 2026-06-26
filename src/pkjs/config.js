@@ -63,32 +63,45 @@ module.exports = [
 
       {
         capabilities: ["COLOR"],
-        type: "heading",
-        size: 4,
-        defaultValue: "Colors",
-      },
-      {
-        capabilities: ["COLOR"],
-        type: "toggle",
-        label: "High contrast text",
-        description:
-          "If you set a custom color, text will always be high contrast",
-        defaultValue: false,
-        messageKey: "PrefHighContrast",
-      },
-      {
-        capabilities: ["COLOR"],
-        type: "toggle",
-        label: "Override main color",
-        defaultValue: false,
-        messageKey: "PrefDoColorOverride",
-      },
-      {
-        capabilities: ["COLOR"],
-        type: "color",
-        label: "Custom color",
-        defaultValue: "0xFF0000",
-        messageKey: "PrefOverrideColor",
+        type: "section",
+        items:
+          [
+            {
+              capabilities: ["COLOR"],
+              type: "heading",
+              size: 4,
+              defaultValue: "Colors",
+            },
+            {
+              type: "toggle",
+              label: "High contrast text",
+              description:
+                "If you set a custom color, text will always be high contrast",
+              defaultValue: false,
+              messageKey: "PrefHighContrast",
+            },
+            {
+              capabilities: ["PLATFORM_EMERY"],
+              type: "toggle",
+              label: "Colorful backlight",
+              description:
+                "If enabled, the watch's backlight will match the color of the jewel or status indicator",
+              defaultValue: false,
+              messageKey: "PrefColorfulBacklight",
+            },
+            {
+              type: "toggle",
+              label: "Override main color",
+              defaultValue: false,
+              messageKey: "PrefDoColorOverride",
+            },
+            {
+              type: "color",
+              label: "Custom color",
+              defaultValue: "0xFF0000",
+              messageKey: "PrefOverrideColor",
+            },
+        ],
       },
     ],
   },

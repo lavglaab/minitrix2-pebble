@@ -84,7 +84,11 @@ void classic_update_style() {
 
     // obelix only - color backliught
     #if PBL_API_EXISTS(light_set_color)
-        light_set_color(classic_color_jewel);
+        if (settings_get()->DoColorBacklight) {
+            light_set_color(classic_color_jewel);
+        } else {
+            light_set_system_color();
+        }
     #endif
 }
 

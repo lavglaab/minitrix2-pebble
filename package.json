@@ -44,7 +44,8 @@
       "WeatherRequestPls",
       "WeatherReturnCode",
       "WeatherTemperatureK",
-      "WeatherCondition"
+      "WeatherCondition",
+      "PrefColorfulBacklight"
     ],
     "resources": {
       "media": [

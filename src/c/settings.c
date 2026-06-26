@@ -13,7 +13,8 @@ static ClaySettings s_default_settings = {
     .HighContrast = false,
     .DoWeather = false,
     .WeatherUnits = 'f',
-    .RectClassicClockLtR = true
+    .RectClassicClockLtR = true,
+    .DoColorBacklight = false
 };
 
 static void prv_settings_save() {
@@ -26,12 +27,7 @@ static int prv_settings_migrate() {
                         // 1 == OK, did a settings migration
 
     // minitrix2 originally did not version its saved settings, so if we have settings with no version, assume it was the original defaults
-    // between version 0.2 and whatever comes after, i plan to add a new setting for text flow direction on the rect classic dial. The default behavior will be different than the previous default behavior, so i want to apply the old behavior to existing user prefs, and the new behavior to new prefs
 
-    // so i think what we want to actually do is
-    // - check if persist exists. if not, this is first run. if so, continue with migration
-    // - check if persist contains a value for SettignsVersion. if not, we are 0.2->0.3
-    // - if we are 0.2->0.3, set a value for classic-time-direction, and set settingsVersion = 1
     if (!persist_exists(VERSION_KEY) && !persist_exists(SETTINGS_KEY)) {
         // no persist exists, this is first run (or user is updated from 0.2 without ever touching settings)
         persist_write_int(VERSION_KEY, SETTINGS_VERSION_CURRENT);
@@ -41,9 +37,17 @@ static int prv_settings_migrate() {
         // we have settings, but no version, which means we are coming from 0.2 settings
         statuscode = 1;
         persist_write_int(VERSION_KEY, 1);
-        // TODO: set classic text flow direction pref to top->bottom
         settings_get()->RectClassicClockLtR = false;
         APP_LOG(APP_LOG_LEVEL_INFO, "Did settings migration: RectClassicClockLtR = false");
+    }
+
+    // settings version 2  --- support colorful backlight on obelix
+    if (persist_read_int(VERSION_KEY) < 2) {
+        // we do not actually need to migrate any settings, but we should increment the
+        // version code just to be safe
+        statuscode = 1;
+        persist_write_int(VERSION_KEY, 2);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Settings migration: DoColorBacklight left at default");
     }
 
     if (statuscode == 1) {
@@ -127,6 +131,12 @@ int settings_process_appmessage(DictionaryIterator *iter, void *context) { // Ca
     Tuple *custom_color_t = dict_find(iter, MESSAGE_KEY_PrefOverrideColor);
     if(custom_color_t) {
         settings_get()->CustomColor = GColorFromHEX(custom_color_t->value->int32);
+        statuscode = 1;
+    }
+
+    Tuple *colorful_backlight_t = dict_find(iter, MESSAGE_KEY_PrefColorfulBacklight);
+    if(colorful_backlight_t) {
+        settings_get()->DoColorBacklight = colorful_backlight_t->value->int32 == 1;
         statuscode = 1;
     }
 

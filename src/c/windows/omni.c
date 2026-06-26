@@ -84,11 +84,15 @@ void omni_update_style() {
 
     // obelix only - color backliught
     #if PBL_API_EXISTS(light_set_color)
+    if (settings_get()->DoColorBacklight) {
         if (!gcolor_equal(omni_color_status, GColorBlack)) {
             light_set_color(omni_color_status);
         } else {
             light_set_color(omni_color_main);
         }
+    } else {
+        light_set_system_color();
+    }
     #endif
 }
 

@@ -4,7 +4,8 @@
 #define SETTINGS_KEY 1
 #define VERSION_KEY 2
 
-#define SETTINGS_VERSION_CURRENT 1
+#define SETTINGS_VERSION_CURRENT 2 // 1: add RectClassicClockLtR, refactor, introduce versioning
+                                   // 2: add DoColorBacklight
 
 typedef struct ClaySettings{
     char DialMode;
@@ -18,6 +19,7 @@ typedef struct ClaySettings{
     char WeatherUnits;
 
     bool RectClassicClockLtR;
+    bool DoColorBacklight;
 } __attribute__((__packed__)) ClaySettings;
 
 ClaySettings * settings_get();
