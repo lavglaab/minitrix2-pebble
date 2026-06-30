@@ -107,47 +107,6 @@ module.exports = [
   },
 
   {
-    type: "section",
-    items: [
-      {
-        type: "heading",
-        defaultValue: "Features",
-      },
-      {
-        type: "toggle",
-        label: "Show weather",
-        description:
-          "You will need to provide an OpenWeatherMap API token for this to work",
-        defaultValue: false,
-        messageKey: "PrefDoWeather",
-      },
-      {
-        type: "input",
-        label: "OpenWeatherMap API Token",
-        defaultValue: "",
-        attributes: { placeholder: "Paste here..." },
-        messageKey: "WeatherToken",
-      },
-      {
-        type: "radiogroup",
-        defaultValue: "f",
-        label: "Weather units",
-        messageKey: "PrefWeatherUnits",
-        options: [
-          {
-            label: "Fahrenheit",
-            value: "f",
-          },
-          {
-            label: "Celsius",
-            value: "c",
-          },
-        ],
-      },
-    ],
-  },
-
-  {
     type: "submit",
     defaultValue: "Save",
   },

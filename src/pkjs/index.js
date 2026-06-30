@@ -47,16 +47,16 @@ Pebble.addEventListener('webviewclosed',
 Pebble.addEventListener('ready',
   function(e) {
     console.log('PebbleKit JS ready!');
-    if (localStorage.getItem("WeatherToken")) {
-        console.log('OWM token present in localstorage');
-    } else {
-        console.log('No OWM token stored');
-    }
-    if (localStorage.getItem("PrefWeatherUnits")) {
-        console.log('Stored weather units pref: ' + localStorage.getItem("PrefWeatherUnits"));
-    } else {
-        console.log('No weather units pref stored');
-    }
+    // if (localStorage.getItem("WeatherToken")) {
+    //     console.log('OWM token present in localstorage');
+    // } else {
+    //     console.log('No OWM token stored');
+    // }
+    // if (localStorage.getItem("PrefWeatherUnits")) {
+    //     console.log('Stored weather units pref: ' + localStorage.getItem("PrefWeatherUnits"));
+    // } else {
+    //     console.log('No weather units pref stored');
+    // }
 
     // Just for debugging, we're going to launch a weather request
     // right now. Remember to remove this when the watch side
