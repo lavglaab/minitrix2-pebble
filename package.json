@@ -52,8 +52,25 @@
         {
           "menuIcon": true,
           "type": "bitmap",
+          "memoryFormat": "1Bit",
           "name": "IMAGE_MENU_ICON",
-          "file": "mintrix_icon_bitmap.png"
+          "file": "mintrix_icon_bitmap.png",
+          "targetPlatforms": [
+            "aplite",
+            "diorite",
+            "flint"
+          ]
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_MENU_ICON",
+          "file": "mintrix_icon_bitmap.png",
+          "targetPlatforms": [
+            "basalt",
+            "chalk",
+            "emery",
+            "gabbro"
+          ]
         },
         {
           "type": "font",
