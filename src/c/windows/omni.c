@@ -229,7 +229,7 @@ static void update_proc_omni_bg(Layer *layer, GContext *ctx) {
             point = GPoint(point.x + origin.x, point.y + origin.y);
 
             // Scale from 100x100 coordinate to displaysplace coordinate
-            point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
+            point = scale_gpoint(point, ((bounds.size.w * 1000) / 100), ((bounds.size.h * 1000) / 100));
             text_draw_centered(ctx, buf, time_font, point, TEXT_OFFSET_ALATSI);
         }
     }
@@ -254,7 +254,7 @@ static void prv_date_layer_resize() {
     point = GPoint(point.x, -point.y); // invert y
     point = GPoint(point.x + origin.x, point.y + origin.y); // Translate coordinate plane back
     // Scale from 100x100 coordinate to displaysplace coordinate
-    point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
+    point = scale_gpoint(point, ((bounds.size.w * 1000) / 100), ((bounds.size.h * 1000) / 100));
 
     // Center textlayer frame around our calculated origin point
     frame_date.origin = GPoint(

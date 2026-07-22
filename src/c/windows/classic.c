@@ -226,7 +226,7 @@ static void update_proc_classic_bg(Layer *layer, GContext *ctx) {
             point = GPoint(point.x + origin.x, point.y + origin.y);
 
             // Scale from 100x100 coordinate to displaysplace coordinate
-            point = scale_gpoint(point, (bounds.size.w / 100.0), (bounds.size.h / 100.0));
+            point = scale_gpoint(point, ((bounds.size.w * 1000) / 100), ((bounds.size.h * 1000) / 100));
             text_draw_centered(ctx, buf, time_font, point, TEXT_OFFSET_BALOO);
         }
     }
