@@ -1,13 +1,13 @@
 {
   "name": "minitrix2",
   "author": "lavendork",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "keywords": [
     "pebble-app"
   ],
   "private": true,
   "dependencies": {
-    "@rebble/clay": "^1.0.8"
+    "@rebble/clay": "1.0.10"
   },
   "pebble": {
     "displayName": "Minitrix2",
@@ -96,7 +96,8 @@
           "file": "Alatsi-Regular.ttf",
           "characterRegex": "[0-9]",
           "targetPlatforms": [
-            "emery", "gabbro"
+            "emery",
+            "gabbro"
           ]
         },
         {
