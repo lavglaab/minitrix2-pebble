@@ -25,6 +25,11 @@ static GColor omni_color_status; // this one does though
 static bool omni_time_showing = false;
 
 /* ---------- UI ----------*/
+
+static bool prv_is_battery_low() {
+    return battery_state_service_peek().charge_percent <= settings_get()->LowBatterySelf;
+}
+
 static GColor prv_omni_color() {
   GColor color = PAL_OMNI_STRIPES;
   #if defined(PBL_COLOR)
@@ -48,7 +53,7 @@ static GColor prv_omni_color_data() {
 
 static GColor prv_omni_color_status() {
   GColor color = PAL_OMNI_BG;
-  if (battery_state_service_peek().charge_percent <= 10) { color = PAL_OMNI_STATUS_LOWBATT; }
+  if (prv_is_battery_low()) { color = PAL_OMNI_STATUS_LOWBATT; }
   if (!connection_service_peek_pebble_app_connection()) { color = PAL_OMNI_STATUS_DISCONNECT; }
   return color;
 }

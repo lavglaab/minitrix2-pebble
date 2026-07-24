@@ -1,6 +1,7 @@
 #include "settings.h"
 #include <pebble.h>
 #include "debug_flags.h"
+#include "low_battery.h"
 
 /* ---------- Settings ---------- */
 static ClaySettings *s_settings;
@@ -11,10 +12,17 @@ static ClaySettings s_default_settings = {
     .DoColorOverride = false,
     .CustomColor = GColorWhite,
     .HighContrast = false,
+
     .DoWeather = false,
     .WeatherUnits = 'f',
     .RectClassicClockLtR = true,
-    .DoColorBacklight = false
+    .DoColorBacklight = false,
+
+    .LowBatterySelf = LOW_BATTERY_SELF,
+    .LowBattery30D = _LOW_BATTERY_30D,
+    .LowBattery14D = _LOW_BATTERY_14D,
+    .LowBattery7D = _LOW_BATTERY_7D,
+    .LowBattery2D = _LOW_BATTERY_2D
 };
 
 static void prv_settings_save() {
@@ -41,13 +49,12 @@ static int prv_settings_migrate() {
         APP_LOG(APP_LOG_LEVEL_INFO, "Did settings migration: RectClassicClockLtR = false");
     }
 
-    // settings version 2  --- support colorful backlight on obelix
-    if (persist_read_int(VERSION_KEY) < 2) {
-        // we do not actually need to migrate any settings, but we should increment the
-        // version code just to be safe
+    if (persist_read_int(VERSION_KEY) < SETTINGS_VERSION_CURRENT) {
+        // We have a new settings version, but nothing specific needs to
+        // change with the settings we had, so just stamp the new version
         statuscode = 1;
-        persist_write_int(VERSION_KEY, 2);
-        APP_LOG(APP_LOG_LEVEL_INFO, "Settings migration: DoColorBacklight left at default");
+        persist_write_int(VERSION_KEY, SETTINGS_VERSION_CURRENT);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Settings migration: Note upgrade(s) that don't require migration");
     }
 
     if (statuscode == 1) {
@@ -151,6 +158,41 @@ int settings_process_appmessage(DictionaryIterator *iter, void *context) { // Ca
     if(weather_units_t) {
       settings_get()->WeatherUnits = weather_units_t->value->int8;
       statuscode = 1;
+    }
+
+    //Features: Low Battery Threshold
+    Tuple *low_battery_30d_t = dict_find(iter, MESSAGE_KEY_PrefLowBattery30D);
+    if (low_battery_30d_t) {
+        settings_get()->LowBattery30D = low_battery_30d_t->value->int32;
+    }
+    Tuple *low_battery_14d_t = dict_find(iter, MESSAGE_KEY_PrefLowBattery14D);
+    if (low_battery_14d_t) {
+        settings_get()->LowBattery14D = low_battery_14d_t->value->int32;
+    }
+    Tuple *low_battery_7d_t = dict_find(iter, MESSAGE_KEY_PrefLowBattery7D);
+    if (low_battery_7d_t) {
+        settings_get()->LowBattery7D = low_battery_7d_t->value->int32;
+    }
+    Tuple *low_battery_2d_t = dict_find(iter, MESSAGE_KEY_PrefLowBattery2D);
+    if (low_battery_2d_t) {
+        settings_get()->LowBattery2D = low_battery_2d_t->value->int32;
+    }
+
+    if (low_battery_30d_t || low_battery_14d_t || low_battery_7d_t || low_battery_2d_t) {
+        statuscode = 1;
+        int batt_threshold;
+
+        PBL_PLATFORM_SWITCH(PBL_PLATFORM_TYPE_CURRENT,
+            batt_threshold = settings_get()->LowBattery7D, // APLITE
+            batt_threshold = settings_get()->LowBattery7D, // BASALT
+            batt_threshold = settings_get()->LowBattery2D, // CHALK
+            batt_threshold = settings_get()->LowBattery7D, // DIORITE
+            batt_threshold = settings_get()->LowBattery30D, // FLINT
+            batt_threshold = settings_get()->LowBattery30D, // EMERY
+            batt_threshold = settings_get()->LowBattery14D // GABBRO
+        );
+
+        settings_get()->LowBatterySelf = batt_threshold;
     }
 
     if (statuscode == 1) { prv_settings_save(); }

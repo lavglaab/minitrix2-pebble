@@ -103,6 +103,81 @@ module.exports = [
             },
         ],
       },
+
+      {
+        type: "section",
+        items: [
+          {
+            type: "heading",
+            size: 4,
+            defaultValue: "Features",
+          },
+
+          {
+            capabilities: ["PLATFORM_EMERY"],
+            type: "slider",
+            messageKey: "PrefLowBattery30D",
+            defaultValue: 6,
+            description: "Defaults to 6%",
+            label: "Low battery threshold",
+            min: 0,
+            max: 100,
+            step: 1,
+            group: "LowBattery"
+          },
+          {
+            capabilities: ["PLATFORM_FLINT"],
+            type: "slider",
+            messageKey: "PrefLowBattery30D",
+            defaultValue: 6,
+            description: "Defaults to 6%",
+            label: "Low battery threshold",
+            min: 0,
+            max: 100,
+            step: 1,
+            group: "LowBattery"
+          },
+
+          {
+            capabilities: ["PLATFORM_GABBRO"],
+            type: "slider",
+            messageKey: "PrefLowBattery14D",
+            defaultValue: 8,
+            description: "Defaults to 8%",
+            label: "Low battery threshold",
+            min: 0,
+            max: 100,
+            step: 1,
+            group: "LowBattery"
+          },
+
+          {
+            capabilities: ["NOT_PLATFORM_FLINT", "NOT_PLATFORM_EMERY", "NOT_PLATFORM_GABBRO", "NOT_PLATFORM_CHALK"],
+            type: "slider",
+            messageKey: "PrefLowBattery7D",
+            defaultValue: 20,
+            description: "Defaults to 20%",
+            label: "Low battery threshold",
+            min: 0,
+            max: 100,
+            step: 10,
+            group: "LowBattery"
+          },
+
+          {
+            capabilities: ["PLATFORM_CHALK"],
+            type: "slider",
+            messageKey: "PrefLowBattery2D",
+            defaultValue: 40,
+            description: "Defaults to 40%",
+            label: "Low battery threshold",
+            min: 0,
+            max: 100,
+            step: 10,
+            group: "LowBattery"
+          },
+        ],
+      },
     ],
   },
 

@@ -24,11 +24,15 @@ static GColor classic_color_jewel;
 static bool classic_time_showing = false;
 
 /* ---------- UI ----------*/
+static bool prv_is_battery_low() {
+    return battery_state_service_peek().charge_percent <= settings_get()->LowBatterySelf;
+}
+
 static GColor prv_classic_jewel_color() {
   GColor color = PAL_CLASSIC_JEWEL;
   #if defined(PBL_COLOR)
   if (settings_get()->DoColorOverride) { color = settings_get()->CustomColor; }
-  if (battery_state_service_peek().charge_percent <= 10) { color = PAL_CLASSIC_STATUS_LOWBATT; }
+  if (prv_is_battery_low()) { color = PAL_CLASSIC_STATUS_LOWBATT; }
   if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_STATUS_DISCONNECT; }
   #endif
   return color;
@@ -44,7 +48,7 @@ static GColor prv_classic_complication_color() {
   }
 
   if (settings_get()->DoColorOverride ) { color = gcolor_legible_over(settings_get()->CustomColor); }
-  if (battery_state_service_peek().charge_percent <= 10) { color = PAL_CLASSIC_TEXT_LOWBATT; }
+  if (prv_is_battery_low()) { color = PAL_CLASSIC_TEXT_LOWBATT; }
   if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_TEXT_DISCONNECT; }
   #endif
   return color;

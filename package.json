@@ -45,7 +45,11 @@
       "WeatherReturnCode",
       "WeatherTemperatureK",
       "WeatherCondition",
-      "PrefColorfulBacklight"
+      "PrefColorfulBacklight",
+      "PrefLowBattery30D",
+      "PrefLowBattery14D",
+      "PrefLowBattery7D",
+      "PrefLowBattery2D"
     ],
     "resources": {
       "media": [
