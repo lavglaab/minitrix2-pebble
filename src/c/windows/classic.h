@@ -19,12 +19,10 @@ void classic_window_unload(Window *window);
 #define PAL_CLASSIC_CLOCK GColorWhite
 #define PAL_CLASSIC_CLOCK_OUTLINE GColorBlack
 
-#if defined(PBL_COLOR)
-#define PAL_CLASSIC_STATUS_DISCONNECT GColorChromeYellow
-#define PAL_CLASSIC_STATUS_LOWBATT GColorRed
-#define PAL_CLASSIC_TEXT_DISCONNECT GColorArmyGreen
-#define PAL_CLASSIC_TEXT_LOWBATT GColorBulgarianRose
-#endif
+#define PAL_CLASSIC_STATUS_DISCONNECT PBL_IF_COLOR_ELSE(GColorChromeYellow, GColorDarkGray)
+#define PAL_CLASSIC_STATUS_LOWBATT PBL_IF_COLOR_ELSE(GColorRed, GColorDarkGray)
+#define PAL_CLASSIC_TEXT_DISCONNECT PBL_IF_COLOR_ELSE(GColorArmyGreen, GColorBlack)
+#define PAL_CLASSIC_TEXT_LOWBATT PBL_IF_COLOR_ELSE(GColorBulgarianRose, GColorBlack)
 
 /* ---------- Text bounds ----------*/
 #if defined(PBL_RECT)

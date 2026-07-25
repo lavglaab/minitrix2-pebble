@@ -32,24 +32,24 @@ static GColor prv_classic_jewel_color() {
   GColor color = PAL_CLASSIC_JEWEL;
   #if defined(PBL_COLOR)
   if (settings_get()->DoColorOverride) { color = settings_get()->CustomColor; }
+  #endif
   if (prv_is_battery_low()) { color = PAL_CLASSIC_STATUS_LOWBATT; }
   if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_STATUS_DISCONNECT; }
-  #endif
   return color;
 }
 
 static GColor prv_classic_complication_color() {
   GColor color = PAL_CLASSIC_COMPLICATIONS;
-  #if defined(PBL_COLOR)
 
+  if (prv_is_battery_low()) { color = PAL_CLASSIC_TEXT_LOWBATT; }
+  if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_TEXT_DISCONNECT; }
+
+  #if defined(PBL_COLOR)
   if (settings_get()->HighContrast) {
     color = gcolor_legible_over(prv_classic_jewel_color());
     return color;
   }
-
   if (settings_get()->DoColorOverride ) { color = gcolor_legible_over(settings_get()->CustomColor); }
-  if (prv_is_battery_low()) { color = PAL_CLASSIC_TEXT_LOWBATT; }
-  if (!connection_service_peek_pebble_app_connection()) { color = PAL_CLASSIC_TEXT_DISCONNECT; }
   #endif
   return color;
 }
